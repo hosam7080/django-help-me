@@ -17,7 +17,7 @@ class User(AbstractUser):
 
 	def clean(self):
 		# Custom phone number validation
-		if not re.match(r"^(010|011|012|015)\d{7}$", self.mobile_phone):
+		if not re.match(r"^(010|011|012|015)\d{8}$", self.mobile_phone):
 			raise ValidationError("Phone number must be 11 digits and start with 010, 011, 012, or 015.")
 		
 	def __str__(self):
@@ -78,7 +78,7 @@ class Reply(models.Model):
 		# return self.written_by # هيتمسح بعد كدة دا مؤقتا بس 
 
 class Report(models.Model):
-	
+
     reported_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name="reports")
     
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="reported_comments")
