@@ -1,8 +1,12 @@
 from django.db import models
+
 from django.core.exceptions import ValidationError
 from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
 import re
+
+
+from datetime import datetime
 
 
 class User(AbstractUser):
@@ -24,9 +28,7 @@ class User(AbstractUser):
 		return f'{self.first_name} {self.last_name}'
 
 
-class Project(models.Model):
-	pass
-	# category = models.ForeignKey("Category", related_name='projects', on_delete=models.SET_NULL, null=True)
+
 
 
 class Donation(models.Model):
@@ -46,7 +48,7 @@ class Category(models.Model):
 class Comment(models.Model):
 	content= models.TextField()
 	created_at = models.DateTimeField(auto_now_add=True)
-	written_by = models.ForeignKey('User',related_name= 'comments', on_delete=models.CASCADE)
+	#written_by = models.ForeignKey('User',related_name= 'comments', on_delete=models.CASCADE)
 	project = models.ForeignKey('Project',related_name='comments',on_delete=models.CASCADE)
 	class Meta:
 		verbose_name_plural="comment"
@@ -81,7 +83,7 @@ class Report(models.Model):
 
     reported_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name="reports")
     
-    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="reported_comments")
+    project = models.ForeignKey('Project', on_delete=models.CASCADE, related_name="reported_comments")
     
     comment = models.ForeignKey(Comment, on_delete=models.CASCADE, related_name="reports")
     
@@ -93,3 +95,24 @@ class Report(models.Model):
 
     def __str__(self):
         return f"Report by {self.reported_by} on comment {self.comment.id}"		
+
+class Tag(models.Model):
+    name = models.CharField(max_length=50, unique=True)
+
+    def __str__(self):
+        return self.name	
+
+
+class Project(models.Model):
+	title=models.CharField(max_length=255,null=True)
+	details=models.TextField(null=True, blank=True)
+	created_at=models.DateTimeField(auto_now_add=True,null=True)
+	total_target = models.DecimalField(max_digits=10, decimal_places=2,null=True) 
+	start_time = models.DateTimeField(null=True)
+	end_time = models.DateTimeField(null=True)
+	#owner=models.ForeignKey(User,related_name='created_by', on_delete=models.SET_NULL, null=True)
+	category = models.ForeignKey(Category, related_name='category', on_delete=models.SET_NULL, null=True)
+	tags = models.ManyToManyField(Tag, blank=True, related_name="projects")
+
+	def __str__(self):
+		return self.title
