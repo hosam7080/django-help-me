@@ -103,6 +103,12 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+fund/migrations
+fund/migrations/
+.fund/migrations
+.fund/migrations/
+helpMe/fund/migrations
+.helpMe/fund/migrations
 
 .spyderproject
 .spyproject
