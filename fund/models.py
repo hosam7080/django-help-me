@@ -15,20 +15,14 @@ class User(AbstractUser):
 	email = models.EmailField(unique=True)
 	password = models.CharField(max_length=255)
 	mobile_phone = models.CharField(max_length=11, unique=True)
-
-	#the profile needs (pillow) installed,,, use (python -m pip install Pillow) to get pillow
-	profile_picture = models.ImageField(upload_to='profile_pics/', blank=True, null=True) #should change where the to save the pictures are saved
+	profile_picture = models.FileField(upload_to='media/', blank=True, null=True)
 
 	def clean(self):
-		# Custom phone number validation
 		if not re.match(r"^(010|011|012|015)\d{8}$", self.mobile_phone):
 			raise ValidationError("Phone number must be 11 digits and start with 010, 011, 012, or 015.")
-		
+
 	def __str__(self):
 		return f'{self.first_name} {self.last_name}'
-
-
-
 
 
 class Donation(models.Model):
@@ -55,18 +49,19 @@ class Category(models.Model):
 	def __str__(self):
 		return self.name
 
+
 class Comment(models.Model):
 	content = models.TextField()
 	created_at = models.DateTimeField(auto_now_add=True)
-	#written_by = models.ForeignKey('User',related_name= 'comments', on_delete=models.CASCADE)
 	project = models.ForeignKey('Project',related_name='comments',on_delete=models.CASCADE)
+
 	class Meta:
 		verbose_name_plural = "comment"
 		ordering = ("created_at",)
 
 	def __str__(self):
-		return self.content   # هيتمسح بعد كدة دا مؤقتا بس 
-		# return self.written_by
+		return self.content
+
 
 class Rate(models.Model):
 	rate = models.IntegerField()
@@ -74,8 +69,7 @@ class Rate(models.Model):
 	project = models.ForeignKey('Project',related_name='rate',on_delete=models.CASCADE)
 
 	def __str__(self):
-		return str(self.rate) # هيتمسح بعد كدة دا مؤقتا بس 
-		# return self.rated_by
+		return str(self.rate)
 
 
 class Reply(models.Model):
@@ -89,14 +83,13 @@ class Reply(models.Model):
 
 	def __str__(self):
 		return self.content 
-		# return self.written_by # هيتمسح بعد كدة دا مؤقتا بس 
-
 
 
 class Picture(models.Model):
-	image = models.ImageField(upload_to='media/')
+	image = models.FileField(upload_to='media/')
 	created_at = models.DateTimeField(auto_now_add=True)
 	project = models.ForeignKey('Project', related_name='pictures', on_delete=models.CASCADE)
+
 	class Meta:
 		verbose_name_plural = "pictures"
 		ordering = ("project",)
@@ -105,27 +98,21 @@ class Picture(models.Model):
 		return self.image.url
 
 class Report(models.Model):
+	reported_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name="reports")
+	project = models.ForeignKey('Project', on_delete=models.CASCADE, related_name="reported_comments")
+	comment = models.ForeignKey(Comment, on_delete=models.CASCADE, related_name="reports")
+	reason = models.TextField(blank=True, null=True)  
+	created_at = models.DateTimeField(default=timezone.now)
 
-    reported_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name="reports")
-    
-    project = models.ForeignKey('Project', on_delete=models.CASCADE, related_name="reported_comments")
-    
-    comment = models.ForeignKey(Comment, on_delete=models.CASCADE, related_name="reports")
-    
+	def __str__(self):
+		return f"Report by {self.reported_by} on comment {self.comment.id}"		
 
-    reason = models.TextField(blank=True, null=True)  
-
-
-    created_at = models.DateTimeField(default=timezone.now)
-
-    def __str__(self):
-        return f"Report by {self.reported_by} on comment {self.comment.id}"		
 
 class Tag(models.Model):
-    name = models.CharField(max_length=50, unique=True)
+	name = models.CharField(max_length=50, unique=True)
 
-    def __str__(self):
-        return self.name	
+	def __str__(self):
+		return self.name	
 
 
 class Project(models.Model):
