@@ -125,7 +125,6 @@ class Project(models.Model):
 	#owner=models.ForeignKey(User,related_name='created_by', on_delete=models.SET_NULL, null=True)
 	category = models.ForeignKey(Category, related_name='category', on_delete=models.SET_NULL, null=True)
 	tags = models.ManyToManyField(Tag, blank=True, related_name="projects")
-
 	def __str__(self):
 		return self.title
 
