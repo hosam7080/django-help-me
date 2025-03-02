@@ -1,6 +1,6 @@
 from django.db import models
 
-from django.core.exceptions import ValidationError
+# from django.core.exceptions import ValidationError
 from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
 import re
@@ -14,20 +14,34 @@ class User(AbstractUser):
 	last_name = models.CharField(max_length=50, blank=True, null=True)
 	username = models.CharField(max_length=50, unique=True)
 	email = models.EmailField(unique=True)
-	password = models.CharField(max_length=255)
-	mobile_phone = models.CharField(max_length=11, unique=True)
+	mobile_phone = models.CharField(max_length=11, unique=True, null=True, blank=True)
 	profile_picture = models.FileField(upload_to='media/', blank=True, null=True)
-
-	def clean(self):
-		if not re.match(r"^(010|011|012|015)\d{8}$", self.mobile_phone):
-			raise ValidationError("Phone number must be 11 digits and start with 010, 011, 012, or 015.")
+	created_at = models.DateTimeField(auto_now_add=True)
 
 	def __str__(self):
-		return f'{self.first_name} {self.last_name}'
+		return f'{self.username}'
+
+
+class Project(models.Model):
+	title = models.CharField(max_length=255, default="Project")
+	details = models.TextField(null=True, blank=True)
+	created_at = models.DateTimeField(auto_now_add=True)
+	total_target = models.IntegerField() 
+	start_time = models.DateTimeField(null=True, blank=True)
+	end_time = models.DateTimeField(null=True, blank=True)
+	owner = models.ForeignKey("User", related_name='projects', on_delete=models.CASCADE, null=True)
+	category = models.ForeignKey("Category", related_name='projects', on_delete=models.SET_NULL, null=True, blank=True)
+	tags = models.ManyToManyField("Tag", blank=True, related_name="projects")
+
+	class Meta:
+		ordering = ("title",)
+
+	def __str__(self):
+		return f'{self.title}'
 
 
 class Donation(models.Model):
-	amount = models.DecimalField(max_digits=10, decimal_places=2)
+	amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
 	donated_by = models.ForeignKey('User', related_name='donations', on_delete=models.SET_NULL, null=True)
 	project = models.ForeignKey('Project', related_name='donations', on_delete=models.CASCADE)
 	donation_date = models.DateTimeField(auto_now_add=True)
@@ -40,50 +54,50 @@ class Donation(models.Model):
 
 
 class Category(models.Model):
-	name = models.CharField(max_length=50,unique=True)
+	name = models.CharField(max_length=50, unique=True)
 	created_at = models.DateTimeField(auto_now_add=True)
-	assigned_to = models.ManyToManyField("Project",related_name= 'categories',related_query_name='categories',blank=True)
 	class Meta:
 		verbose_name_plural = "categories"
 		ordering = ("name",)
 
 	def __str__(self):
-		return self.name
+		return f'{self.name}'
 
 
 class Comment(models.Model):
 	content = models.TextField()
 	created_at = models.DateTimeField(auto_now_add=True)
-	project = models.ForeignKey('Project',related_name='comments',on_delete=models.CASCADE)
+	project = models.ForeignKey('Project' , related_name='comments',on_delete=models.CASCADE)
+	user = models.ForeignKey("User", related_name='comments', on_delete=models.CASCADE)
 
 	class Meta:
-		verbose_name_plural = "comment"
+		verbose_name_plural = "Comments"
 		ordering = ("created_at",)
 
 	def __str__(self):
-		return self.content
+		return f'Comment {self.id}, by {self.user} on Project {self.project}'
 
 
 class Rate(models.Model):
-	rate = models.IntegerField()
-	rated_by = models.ForeignKey('User',related_name='rate',on_delete=models.CASCADE)	
-	project = models.ForeignKey('Project',related_name='rate',on_delete=models.CASCADE)
+	rate = models.IntegerField(choices=((1, 1), (2, 2), (3, 3), (4, 4), (5, 5)))
+	rated_by = models.ForeignKey('User', related_name='rated_projects', on_delete=models.CASCADE)	
+	project = models.ForeignKey('Project', related_name='rating', on_delete=models.CASCADE)
 
 	def __str__(self):
-		return str(self.rate)
+		return f'Rating by user {self.rated_by} on project {self.project}'
 
 
 class Reply(models.Model):
 	content = models.TextField()
 	created_at = models.DateTimeField(auto_now_add=True)
-	written_by = models.ForeignKey('User', related_name='reply', on_delete=models.CASCADE)
-	comment = models.ForeignKey('Comment', related_name='reply', on_delete=models.CASCADE)
+	user = models.ForeignKey('User', related_name='replies', on_delete=models.CASCADE)
+	comment = models.ForeignKey('Comment', related_name='replies', on_delete=models.CASCADE)
 	class Meta:
 		verbose_name_plural = "replies"
 		ordering = ("created_at",)
 
 	def __str__(self):
-		return self.content 
+		return f'Reply on comment {self.comment} by user {self.user}'
 
 
 class Picture(models.Model):
@@ -96,37 +110,23 @@ class Picture(models.Model):
 		ordering = ("project",)
 
 	def __str__(self):
-		return self.image.url
+		return f'Picture {self.id} on project {self.project}'
+
 
 class Report(models.Model):
-	reported_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name="reports")
-	project = models.ForeignKey('Project', on_delete=models.CASCADE, related_name="reported_comments")
-	comment = models.ForeignKey(Comment, on_delete=models.CASCADE, related_name="reports")
+	reported_by = models.ForeignKey("User", on_delete=models.CASCADE, related_name="reports")
+	project = models.ForeignKey("Project", on_delete=models.CASCADE, related_name="reports", null=True)
+	comment = models.ForeignKey("Comment", on_delete=models.CASCADE, related_name="reports", null=True)
 	reason = models.TextField(blank=True, null=True)  
-	created_at = models.DateTimeField(default=timezone.now)
+	created_at = models.DateTimeField(auto_now_add=True)
 
 	def __str__(self):
-		return f"Report by {self.reported_by} on comment {self.comment.id}"		
+		return f"Report by {self.reported_by} on comment {self.comment} on project {self.project}"		
 
 
 class Tag(models.Model):
 	name = models.CharField(max_length=50, unique=True)
 
 	def __str__(self):
-		return self.name	
-
-
-class Project(models.Model):
-	title=models.CharField(max_length=255,null=True)
-	details=models.TextField(null=True, blank=True)
-	created_at=models.DateTimeField(auto_now_add=True,null=True)
-	total_target = models.DecimalField(max_digits=10, decimal_places=2,null=True) 
-	start_time = models.DateTimeField(null=True)
-	end_time = models.DateTimeField(null=True)
-	#owner=models.ForeignKey(User,related_name='created_by', on_delete=models.SET_NULL, null=True)
-	category = models.ForeignKey(Category, related_name='category', on_delete=models.SET_NULL, null=True)
-	tags = models.ManyToManyField(Tag, blank=True, related_name="projects")
-
-	def __str__(self):
-		return self.title
+		return f'{self.name}'
 
