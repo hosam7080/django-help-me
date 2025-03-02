@@ -10,8 +10,9 @@ from datetime import datetime
 
 
 class User(AbstractUser):
-	first_name = models.CharField(max_length=50)
-	last_name = models.CharField(max_length=50)
+	first_name = models.CharField(max_length=50, blank=True, null=True)
+	last_name = models.CharField(max_length=50, blank=True, null=True)
+	username = models.CharField(max_length=50, unique=True)
 	email = models.EmailField(unique=True)
 	password = models.CharField(max_length=255)
 	mobile_phone = models.CharField(max_length=11, unique=True)
