@@ -1,12 +1,5 @@
 from django.db import models
-
-# from django.core.exceptions import ValidationError
 from django.contrib.auth.models import AbstractUser
-from django.utils import timezone
-import re
-
-
-from datetime import datetime
 
 
 class User(AbstractUser):
@@ -45,6 +38,7 @@ class Donation(models.Model):
 	donated_by = models.ForeignKey('User', related_name='donations', on_delete=models.SET_NULL, null=True)
 	project = models.ForeignKey('Project', related_name='donations', on_delete=models.CASCADE)
 	donation_date = models.DateTimeField(auto_now_add=True)
+
 	class Meta:
 		verbose_name_plural = "donations"
 		ordering = ("donation_date",)
@@ -56,6 +50,7 @@ class Donation(models.Model):
 class Category(models.Model):
 	name = models.CharField(max_length=50, unique=True)
 	created_at = models.DateTimeField(auto_now_add=True)
+
 	class Meta:
 		verbose_name_plural = "categories"
 		ordering = ("name",)
@@ -92,6 +87,7 @@ class Reply(models.Model):
 	created_at = models.DateTimeField(auto_now_add=True)
 	user = models.ForeignKey('User', related_name='replies', on_delete=models.CASCADE)
 	comment = models.ForeignKey('Comment', related_name='replies', on_delete=models.CASCADE)
+
 	class Meta:
 		verbose_name_plural = "replies"
 		ordering = ("created_at",)
