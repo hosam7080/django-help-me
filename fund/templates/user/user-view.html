@@ -1,0 +1,38 @@
+{% extends '../base/base.html' %}
+{% block content %}
+<h2>User List</h2>
+<a href="{% url 'user_create' %}">Create New User</a>
+<style>
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    th, td {
+        border: 1px solid black;
+        padding: 8px;
+        text-align: left;
+    }
+    th {
+        background-color: #f2f2f2;
+    }
+</style>
+<table>
+    <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Phone</th>
+        <th>Actions</th>
+    </tr>
+    {% for user in users %}
+    <tr>
+        <td>{{ user.first_name }} {{ user.last_name }}</td>
+        <td>{{ user.email }}</td>
+        <td>{{ user.mobile_phone }}</td>
+        <td>
+            <a href="{% url 'user_update' user.id %}">Edit</a> | 
+            <a href="{% url 'user_delete' user.id %}">Delete</a>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}
