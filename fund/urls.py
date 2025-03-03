@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import ProjectListView, ProjectCreateView, ProjectUpdateView, ProjectDeleteView
+from .views import *
 
 urlpatterns = [
 
