@@ -21,7 +21,10 @@
       <div class="col-12">
         <div class="card shadow-sm">
           <div class="card-body">
-            <h5 class="card-title">{{ project.title }}</h5>
+            <h5 class="card-title">
+              <a class="text-decoration-none text-info" href="{% url 'project_detail' project.id %}">
+                {{ project.title}} </a>
+            </h5>
             <p class="card-text">{{ project.details|default:"No details provided." }}</p>
             <p class="card-text">
               <small class="text-muted">Category: {{ project.category }}</small><br>
@@ -30,14 +33,11 @@
             </p>
             <!-- Edit button with data attributes for populating the Update Project modal -->
             <button class="btn btn-warning btn-sm edit-btn" data-bs-toggle="modal" data-bs-target="#updateProjectModal"
-                    data-id="{{ project.id }}"
-                    data-title="{{ project.title }}"
-                    data-details="{{ project.details }}"
-                    data-total_target="{{ project.total_target }}"
-                    data-start_time="{{ project.start_time|date:'Y-m-d\\TH:i' }}"
-                    data-end_time="{{ project.end_time|date:'Y-m-d\\TH:i' }}"
-                    data-category="{{ project.category.id }}"
-                    data-tags="{% for tag in project.tags.all %}{{ tag.id }}{% if not forloop.last %},{% endif %}{% endfor %}">
+              data-id="{{ project.id }}" data-title="{{ project.title }}" data-details="{{ project.details }}"
+              data-total_target="{{ project.total_target }}"
+              data-start_time="{{ project.start_time|date:'Y-m-d\\TH:i' }}"
+              data-end_time="{{ project.end_time|date:'Y-m-d\\TH:i' }}" data-category="{{ project.category.id }}"
+              data-tags="{% for tag in project.tags.all %}{{ tag.id }}{% if not forloop.last %},{% endif %}{% endfor %}">
               Edit Your Project
             </button>
           </div>
@@ -121,10 +121,12 @@
           <div class="mb-3">
             <label class="form-label">Tags</label>
             <div class="input-group">
-              <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" id="addTagDropdownButton">Select Tag</button>
+              <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown"
+                aria-expanded="false" id="addTagDropdownButton">Select Tag</button>
               <ul class="dropdown-menu" id="addTagDropdownMenu">
                 {% for tag in tags %}
-                <li><a class="dropdown-item" href="#" data-tag-id="{{ tag.id }}" data-tag-name="{{ tag.name }}">{{ tag.name }}</a></li>
+                <li><a class="dropdown-item" href="#" data-tag-id="{{ tag.id }}" data-tag-name="{{ tag.name }}">{{
+                    tag.name }}</a></li>
                 {% endfor %}
               </ul>
               <button class="btn btn-secondary" type="button" id="addTagButton">Add</button>
@@ -148,7 +150,8 @@
 </div>
 
 <!-- Update Project Modal -->
-<div class="modal fade" id="updateProjectModal" tabindex="-1" aria-labelledby="updateProjectModalLabel" aria-hidden="true">
+<div class="modal fade" id="updateProjectModal" tabindex="-1" aria-labelledby="updateProjectModalLabel"
+  aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <!-- Form with Bootstrap validation for updating a project -->
@@ -219,10 +222,12 @@
           <div class="mb-3">
             <label class="form-label">Tags</label>
             <div class="input-group">
-              <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" id="updateTagDropdownButton">Select Tag</button>
+              <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown"
+                aria-expanded="false" id="updateTagDropdownButton">Select Tag</button>
               <ul class="dropdown-menu" id="updateTagDropdownMenu">
                 {% for tag in tags %}
-                <li><a class="dropdown-item" href="#" data-tag-id="{{ tag.id }}" data-tag-name="{{ tag.name }}">{{ tag.name }}</a></li>
+                <li><a class="dropdown-item" href="#" data-tag-id="{{ tag.id }}" data-tag-name="{{ tag.name }}">{{
+                    tag.name }}</a></li>
                 {% endfor %}
               </ul>
               <button class="btn btn-secondary" type="button" id="updateTagButton">Add</button>
@@ -253,7 +258,8 @@
 </div>
 
 <!-- Delete Confirmation Modal -->
-<div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel"
+  aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <form method="POST" id="deleteProjectForm" action="{% url 'project_delete' 0 %}">
@@ -305,7 +311,7 @@
       end_time: document.getElementById('updateEndTime').value,
       category: document.getElementById('updateCategory').value,
       tags: Array.from(document.getElementById('updateSelectedTagsContainer').querySelectorAll('span'))
-              .map(opt => opt.getAttribute('data-tag-id')).join(',')
+        .map(opt => opt.getAttribute('data-tag-id')).join(',')
     };
     const hasChanged = Object.keys(initialUpdateData).some(key => initialUpdateData[key] !== currentData[key]);
     document.getElementById('updateSubmitBtn').disabled = !hasChanged;
@@ -336,14 +342,14 @@
     let container = document.getElementById('updateSelectedTagsContainer');
     container.innerHTML = '';
     tags.forEach(tagId => {
-      let item = document.querySelector('#updateTagDropdownMenu a[data-tag-id="'+tagId+'"]');
+      let item = document.querySelector('#updateTagDropdownMenu a[data-tag-id="' + tagId + '"]');
       if (item) {
         let badge = document.createElement('span');
         badge.className = 'badge bg-primary me-1';
         badge.textContent = item.getAttribute('data-tag-name');
         badge.setAttribute('data-tag-id', tagId);
         badge.style.cursor = 'pointer';
-        badge.addEventListener('click', function() {
+        badge.addEventListener('click', function () {
           this.remove();
           updateUpdateTagsInput();
         });
@@ -382,7 +388,7 @@
   /* ======== JavaScript for Tags Dropdown in Add Modal ======== */
   let addSelectedTag = null;
   document.querySelectorAll('#addTagDropdownMenu a').forEach(item => {
-    item.addEventListener('click', function(e) {
+    item.addEventListener('click', function (e) {
       e.preventDefault();
       addSelectedTag = {
         id: this.getAttribute('data-tag-id'),
@@ -392,10 +398,10 @@
     });
   });
 
-  document.getElementById('addTagButton').addEventListener('click', function() {
+  document.getElementById('addTagButton').addEventListener('click', function () {
     if (!addSelectedTag) return;
     let container = document.getElementById('addSelectedTagsContainer');
-    if (container.querySelector('[data-tag-id="'+addSelectedTag.id+'"]')) {
+    if (container.querySelector('[data-tag-id="' + addSelectedTag.id + '"]')) {
       return;
     }
     let badge = document.createElement('span');
@@ -403,7 +409,7 @@
     badge.textContent = addSelectedTag.name;
     badge.setAttribute('data-tag-id', addSelectedTag.id);
     badge.style.cursor = 'pointer';
-    badge.addEventListener('click', function() {
+    badge.addEventListener('click', function () {
       this.remove();
       updateAddTagsInput();
     });
@@ -423,7 +429,7 @@
   /* ======== JavaScript for Tags Dropdown in Update Modal ======== */
   let updateSelectedTag = null;
   document.querySelectorAll('#updateTagDropdownMenu a').forEach(item => {
-    item.addEventListener('click', function(e) {
+    item.addEventListener('click', function (e) {
       e.preventDefault();
       updateSelectedTag = {
         id: this.getAttribute('data-tag-id'),
@@ -433,10 +439,10 @@
     });
   });
 
-  document.getElementById('updateTagButton').addEventListener('click', function() {
+  document.getElementById('updateTagButton').addEventListener('click', function () {
     if (!updateSelectedTag) return;
     let container = document.getElementById('updateSelectedTagsContainer');
-    if (container.querySelector('[data-tag-id="'+updateSelectedTag.id+'"]')) {
+    if (container.querySelector('[data-tag-id="' + updateSelectedTag.id + '"]')) {
       return;
     }
     let badge = document.createElement('span');
@@ -444,7 +450,7 @@
     badge.textContent = updateSelectedTag.name;
     badge.setAttribute('data-tag-id', updateSelectedTag.id);
     badge.style.cursor = 'pointer';
-    badge.addEventListener('click', function() {
+    badge.addEventListener('click', function () {
       this.remove();
       updateUpdateTagsInput();
     });
