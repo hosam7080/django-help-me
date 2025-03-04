@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Comment,Category,Rate,Reply,User,Report,Project,Tag
+from .models import Comment,Category, Donation,Rate,Reply,User,Report,Project,Tag
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django.utils.translation import gettext_lazy as _
@@ -37,5 +37,6 @@ admin.site.register(Reply)
 admin.site.register(Report)
 admin.site.register(Project)
 admin.site.register(Tag)
+admin.site.register(Donation)
 
 

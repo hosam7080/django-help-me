@@ -1,7 +1,10 @@
-from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView, View
+from django.shortcuts import render
 from .models import Project, Tag, Category, User
 from .forms import ProjectForm, UserForm
 from django.urls import reverse_lazy
+from django.db.models import Avg, Sum
+from django.db.models import Q
 
 
 
@@ -66,3 +69,42 @@ class UserDetailView(DetailView):
     model = User
     template_name = 'users/user_detail.html'
     context_object_name = 'user'
+    
+    
+class homepage(View):
+    def get(self, request):
+        highest_rated_projects = Project.objects.filter(end_time__isnull=True).annotate(
+        avg_rating=Avg('rating__rate')
+        ).order_by('-avg_rating')[:5]
+        
+        highest_donated_projects = Project.objects.annotate(
+        total_donation=Sum('donations__amount')
+        ).order_by('-total_donation')[:5]
+        print(highest_donated_projects)
+
+        latest_projects = Project.objects.order_by('-created_at')[:5]
+
+        featured_projects = Project.objects.filter(featuerd=True).order_by('-created_at')[:5]
+
+        categories = Category.objects.all()
+
+        query = request.GET.get('q')
+        search_results = None
+        if query:
+            search_results = Project.objects.filter(
+                Q(title__icontains=query) | Q(tags__name__icontains=query)
+            ).distinct()
+            
+        
+
+        context = {
+            'highest_rated_projects': highest_rated_projects,
+            'latest_projects': latest_projects,
+            'featured_projects': featured_projects,
+            'categories': categories,
+            'search_results': search_results,
+            'query': query,
+            'highest_donated_projects': highest_donated_projects,
+            
+        }
+        return render(request, 'base/homepage.html', context)
