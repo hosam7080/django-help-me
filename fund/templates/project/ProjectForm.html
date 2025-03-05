@@ -56,7 +56,7 @@
 <div class="modal fade" id="addProjectModal" tabindex="-1" aria-labelledby="addProjectModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
-      <!-- Note: تأكد من أن الـ CreateView بعد الحفظ يعيد التوجيه للصفحة المناسبة (success_url) -->
+      <!-- تأكد من إضافة enctype="multipart/form-data" لاستقبال الملفات -->
       <form method="POST" action="{% url 'project_create' %}" enctype="multipart/form-data" class="needs-validation" novalidate>
         {% csrf_token %}
         <div class="modal-header">
@@ -64,13 +64,13 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <!-- Title -->
+          <!-- Project Title -->
           <div class="mb-3">
             <label for="addTitle" class="form-label">Title</label>
             <input type="text" class="form-control" id="addTitle" name="title" required>
             <div class="invalid-feedback">Please provide a project title.</div>
           </div>
-          <!-- Details -->
+          <!-- Project Details -->
           <div class="mb-3">
             <label for="addDetails" class="form-label">Details</label>
             <textarea class="form-control" id="addDetails" name="details" required></textarea>
@@ -116,14 +116,13 @@
             </select>
             <button type="button" class="btn btn-secondary mt-2" id="addTagBtn">Add Tag</button>
             <div id="selectedTagsContainer" class="mt-2"></div>
-            <!-- الحقل المخفي لتخزين التاجات المختارة بصيغة "1,3,5" ويكون required للفاليديشن -->
             <input type="hidden" name="tags" id="selectedTagsInput" required>
             <div class="invalid-feedback">Please select at least one tag.</div>
           </div>
-          <!-- Image -->
+          <!-- Project Images: رفع ملفات متعددة -->
           <div class="mb-3">
-            <label for="addImage" class="form-label">Project Image</label>
-            <input type="file" class="form-control" id="addImage" name="image" multiple>
+            <label for="addImages" class="form-label">Project Images</label>
+            <input type="file" class="form-control" id="addImages" name="images" multiple>
           </div>
         </div>
         <div class="modal-footer">
@@ -135,7 +134,7 @@
   </div>
 </div>
 
-<!-- Update Project Modal -->
+<!-- Update Project Modal (مثال مبسط مشابه للإضافة) -->
 <div class="modal fade" id="updateProjectModal" tabindex="-1" aria-labelledby="updateProjectModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
@@ -147,37 +146,32 @@
         </div>
         <div class="modal-body">
           <input type="hidden" id="updateProjectId" name="project_id">
-          <!-- Title -->
+          <!-- تكرار نفس الحقول كما في نموذج الإضافة -->
           <div class="mb-3">
             <label for="updateTitle" class="form-label">Title</label>
             <input type="text" class="form-control" id="updateTitle" name="title" required>
             <div class="invalid-feedback">Please provide a project title.</div>
           </div>
-          <!-- Details -->
           <div class="mb-3">
             <label for="updateDetails" class="form-label">Details</label>
             <textarea class="form-control" id="updateDetails" name="details" required></textarea>
             <div class="invalid-feedback">Please provide project details.</div>
           </div>
-          <!-- Total Target -->
           <div class="mb-3">
             <label for="updateTotalTarget" class="form-label">Total Target</label>
             <input type="number" step="0.01" class="form-control" id="updateTotalTarget" name="total_target" required>
             <div class="invalid-feedback">Please enter a valid total target.</div>
           </div>
-          <!-- Start Time -->
           <div class="mb-3">
             <label for="updateStartTime" class="form-label">Start Time</label>
             <input type="datetime-local" class="form-control" id="updateStartTime" name="start_time" required>
             <div class="invalid-feedback">Please provide a start time.</div>
           </div>
-          <!-- End Time -->
           <div class="mb-3">
             <label for="updateEndTime" class="form-label">End Time</label>
             <input type="datetime-local" class="form-control" id="updateEndTime" name="end_time" required>
             <div class="invalid-feedback">Please provide an end time.</div>
           </div>
-          <!-- Category -->
           <div class="mb-3">
             <label for="updateCategory" class="form-label">Category</label>
             <select class="form-select" id="updateCategory" name="category" required>
@@ -188,7 +182,7 @@
             </select>
             <div class="invalid-feedback">Please select a category.</div>
           </div>
-          <!-- Tags -->
+          <!-- Tags for update -->
           <div class="mb-3">
             <label class="form-label">Tags</label>
             <select class="form-select" id="updateTagsSelect">
@@ -202,10 +196,10 @@
             <input type="hidden" name="tags" id="updateSelectedTagsInput" required>
             <div class="invalid-feedback">Please select at least one tag.</div>
           </div>
-          <!-- Optional: Update Image -->
+          <!-- Optional: رفع صور إضافية أثناء التحديث -->
           <div class="mb-3">
-            <label for="updateImage" class="form-label">Project Image</label>
-            <input type="file" class="form-control" id="updateImage" name="image">
+            <label for="updateImages" class="form-label">Project Images</label>
+            <input type="file" class="form-control" id="updateImages" name="images" multiple>
           </div>
         </div>
         <div class="modal-footer">
@@ -243,21 +237,20 @@
   </div>
 </div>
 
-<!-- JavaScript -->
+<!-- JavaScript for form validation and Tags logic -->
 <script>
-  // Bootstrap form validation
   (function () {
-    'use strict'
-    var forms = document.querySelectorAll('.needs-validation')
+    'use strict';
+    var forms = document.querySelectorAll('.needs-validation');
     Array.prototype.slice.call(forms).forEach(function (form) {
       form.addEventListener('submit', function (event) {
         if (!form.checkValidity()) {
-          event.preventDefault()
-          event.stopPropagation()
+          event.preventDefault();
+          event.stopPropagation();
         }
-        form.classList.add('was-validated')
-      }, false)
-    })
+        form.classList.add('was-validated');
+      }, false);
+    });
   })();
 
   /* ======== Add Modal: Tags Logic ======== */
@@ -267,7 +260,6 @@
     var selectedText = select.options[select.selectedIndex].text;
     if(selectedValue === "") return;
     var container = document.getElementById('selectedTagsContainer');
-    // منع إضافة نفس التاج أكثر من مرة
     if(container.querySelector('[data-tag-id="'+selectedValue+'"]')) return;
     var badge = document.createElement('span');
     badge.className = 'badge bg-primary me-1';
@@ -357,7 +349,6 @@
     document.getElementById('updateEndTime').value = endTime;
     document.getElementById('updateCategory').value = category;
     
-    // إعداد التاجات في نموذج التحديث
     var updateContainer = document.getElementById('updateSelectedTagsContainer');
     updateContainer.innerHTML = "";
     tags.forEach(function(tagId){

@@ -26,7 +26,6 @@ class Project(models.Model):
 	owner = models.ForeignKey("User", related_name='projects', on_delete=models.CASCADE, null=True)
 	category = models.ForeignKey("Category", related_name='projects', on_delete=models.SET_NULL, null=True, blank=True)
 	tags = models.ManyToManyField("Tag", blank=True, related_name="projects")
-	image = models.FileField(upload_to='media/projects',blank=True,null=True)  # Image Field Added
 
 	class Meta:
 		ordering = ("title",)

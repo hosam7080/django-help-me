@@ -29,7 +29,7 @@ class ProjectCreateView(CreateView):
     
     def form_valid(self, form):
         response = super().form_valid(form)
-        images = self.request.FILES.getlist('images')
+        images = self.request.FILES.getlist('images') 
         for image in images:
             Picture.objects.create(project=self.object, image=image)
         return response
