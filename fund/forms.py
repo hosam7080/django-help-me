@@ -8,6 +8,21 @@ class ProjectForm(forms.ModelForm):
     class Meta:
         model = Project
         fields = ['title', 'details', 'total_target', 'start_time', 'end_time', 'category', 'tags']
+    def save(self, commit=True):
+            instance = super().save(commit=False)
+            tags_value = self.cleaned_data.get('tags')
+            if isinstance(tags_value, str):
+                tag_ids = [int(x) for x in tags_value.split(',') if x]
+            else:
+                tag_ids = [tag.id for tag in tags_value]
+            if commit:
+                instance.save()
+                instance.tags.set(tag_ids)
+            else:
+                self._pending_tags = tag_ids
+            return instance
+
+
 
 
 class UserForm(forms.ModelForm):

@@ -40,3 +40,12 @@ admin.site.register(Tag)
 admin.site.register(Donation)
 
 
+
+
+
+# testing 
+from .models import Picture
+
+@admin.register(Picture)
+class PictureAdmin(admin.ModelAdmin):
+    list_display = ('id', 'project', 'created_at')
