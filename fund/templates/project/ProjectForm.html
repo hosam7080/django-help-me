@@ -1,5 +1,6 @@
 {% extends "base/base.html" %}
 {% load static %}
+
 {% block title %}Project Management{% endblock title %}
 
 {% block content %}
@@ -16,14 +17,14 @@
   <!-- Container for displaying all projects as individual cards -->
   <div class="container">
     {% for project in projects %}
-    <!-- Each project is displayed in a card format -->
     <div class="row mb-4">
       <div class="col-12">
         <div class="card shadow-sm">
           <div class="card-body">
             <h5 class="card-title">
               <a class="text-decoration-none text-info" href="{% url 'project_detail' project.id %}">
-                {{ project.title}} </a>
+                {{ project.title }}
+              </a>
             </h5>
             <p class="card-text">{{ project.details|default:"No details provided." }}</p>
             <p class="card-text">
@@ -36,7 +37,8 @@
               data-id="{{ project.id }}" data-title="{{ project.title }}" data-details="{{ project.details }}"
               data-total_target="{{ project.total_target }}"
               data-start_time="{{ project.start_time|date:'Y-m-d\\TH:i' }}"
-              data-end_time="{{ project.end_time|date:'Y-m-d\\TH:i' }}" data-category="{{ project.category.id }}"
+              data-end_time="{{ project.end_time|date:'Y-m-d\\TH:i' }}"
+              data-category="{% if project.category %}{{ project.category.id }}{% endif %}"
               data-tags="{% for tag in project.tags.all %}{{ tag.id }}{% if not forloop.last %},{% endif %}{% endfor %}">
               Edit Your Project
             </button>
@@ -45,7 +47,6 @@
       </div>
     </div>
     {% empty %}
-    <!-- Message displayed when there are no projects -->
     <div class="alert alert-info">No projects available.</div>
     {% endfor %}
   </div>
@@ -55,55 +56,45 @@
 <div class="modal fade" id="addProjectModal" tabindex="-1" aria-labelledby="addProjectModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
-      <!-- Form with Bootstrap validation for adding a new project -->
-      <form method="POST" action="{% url 'project_create' %}" class="needs-validation" novalidate>
+      <!-- Note: تأكد من أن الـ CreateView بعد الحفظ يعيد التوجيه للصفحة المناسبة (success_url) -->
+      <form method="POST" action="{% url 'project_create' %}" enctype="multipart/form-data" class="needs-validation" novalidate>
         {% csrf_token %}
         <div class="modal-header">
           <h5 class="modal-title" id="addProjectModalLabel">Add New Project</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <!-- Input field for project title -->
+          <!-- Title -->
           <div class="mb-3">
             <label for="addTitle" class="form-label">Title</label>
             <input type="text" class="form-control" id="addTitle" name="title" required>
-            <div class="invalid-feedback">
-              Please provide a project title.
-            </div>
+            <div class="invalid-feedback">Please provide a project title.</div>
           </div>
-          <!-- Textarea for project details -->
+          <!-- Details -->
           <div class="mb-3">
             <label for="addDetails" class="form-label">Details</label>
             <textarea class="form-control" id="addDetails" name="details" required></textarea>
-            <div class="invalid-feedback">
-              Please provide project details.
-            </div>
+            <div class="invalid-feedback">Please provide project details.</div>
           </div>
-          <!-- Input field for project total target -->
+          <!-- Total Target -->
           <div class="mb-3">
             <label for="addTotalTarget" class="form-label">Total Target</label>
             <input type="number" step="0.01" class="form-control" id="addTotalTarget" name="total_target" required>
-            <div class="invalid-feedback">
-              Please enter a valid total target.
-            </div>
+            <div class="invalid-feedback">Please enter a valid total target.</div>
           </div>
-          <!-- Input field for project start time -->
+          <!-- Start Time -->
           <div class="mb-3">
             <label for="addStartTime" class="form-label">Start Time</label>
             <input type="datetime-local" class="form-control" id="addStartTime" name="start_time" required>
-            <div class="invalid-feedback">
-              Please provide a start time.
-            </div>
+            <div class="invalid-feedback">Please provide a start time.</div>
           </div>
-          <!-- Input field for project end time -->
+          <!-- End Time -->
           <div class="mb-3">
             <label for="addEndTime" class="form-label">End Time</label>
             <input type="datetime-local" class="form-control" id="addEndTime" name="end_time" required>
-            <div class="invalid-feedback">
-              Please provide an end time.
-            </div>
+            <div class="invalid-feedback">Please provide an end time.</div>
           </div>
-          <!-- Dropdown for selecting project category -->
+          <!-- Category -->
           <div class="mb-3">
             <label for="addCategory" class="form-label">Category</label>
             <select class="form-select" id="addCategory" name="category" required>
@@ -112,33 +103,28 @@
               <option value="{{ cat.id }}">{{ cat.name }}</option>
               {% endfor %}
             </select>
-            <div class="invalid-feedback">
-              Please select a category.
-            </div>
+            <div class="invalid-feedback">Please select a category.</div>
           </div>
-
-          <!-- Custom Tags selection block with dropdown and add button for Add Modal -->
+          <!-- Tags -->
           <div class="mb-3">
             <label class="form-label">Tags</label>
-            <div class="input-group">
-              <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown"
-                aria-expanded="false" id="addTagDropdownButton">Select Tag</button>
-              <ul class="dropdown-menu" id="addTagDropdownMenu">
-                {% for tag in tags %}
-                <li><a class="dropdown-item" href="#" data-tag-id="{{ tag.id }}" data-tag-name="{{ tag.name }}">{{
-                    tag.name }}</a></li>
-                {% endfor %}
-              </ul>
-              <button class="btn btn-secondary" type="button" id="addTagButton">Add</button>
-            </div>
-            <input type="hidden" name="tags" id="addSelectedTagsInput" required>
-            <div id="addSelectedTagsContainer" class="mt-2"></div>
-            <div class="invalid-feedback">
-              Please select at least one tag.
-            </div>
+            <select class="form-select" id="addTagsSelect">
+              <option value="">Select a Tag</option>
+              {% for tag in tags %}
+              <option value="{{ tag.id }}">{{ tag.name }}</option>
+              {% endfor %}
+            </select>
+            <button type="button" class="btn btn-secondary mt-2" id="addTagBtn">Add Tag</button>
+            <div id="selectedTagsContainer" class="mt-2"></div>
+            <!-- الحقل المخفي لتخزين التاجات المختارة بصيغة "1,3,5" ويكون required للفاليديشن -->
+            <input type="hidden" name="tags" id="selectedTagsInput" required>
+            <div class="invalid-feedback">Please select at least one tag.</div>
           </div>
-          <!-- End of Tags selection block -->
-
+          <!-- Image -->
+          <div class="mb-3">
+            <label for="addImage" class="form-label">Project Image</label>
+            <input type="file" class="form-control" id="addImage" name="image" multiple>
+          </div>
         </div>
         <div class="modal-footer">
           <button type="submit" class="btn btn-primary">Add Project</button>
@@ -150,61 +136,48 @@
 </div>
 
 <!-- Update Project Modal -->
-<div class="modal fade" id="updateProjectModal" tabindex="-1" aria-labelledby="updateProjectModalLabel"
-  aria-hidden="true">
+<div class="modal fade" id="updateProjectModal" tabindex="-1" aria-labelledby="updateProjectModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
-      <!-- Form with Bootstrap validation for updating a project -->
-      <form method="POST" id="updateProjectForm" action="" class="needs-validation" novalidate>
+      <form method="POST" id="updateProjectForm" action="" enctype="multipart/form-data" class="needs-validation" novalidate>
         {% csrf_token %}
         <div class="modal-header">
           <h5 class="modal-title" id="updateProjectModalLabel">Update Project</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <!-- Hidden input to store the project ID for update -->
           <input type="hidden" id="updateProjectId" name="project_id">
-          <!-- Input field for project title in update form -->
+          <!-- Title -->
           <div class="mb-3">
             <label for="updateTitle" class="form-label">Title</label>
             <input type="text" class="form-control" id="updateTitle" name="title" required>
-            <div class="invalid-feedback">
-              Please provide a project title.
-            </div>
+            <div class="invalid-feedback">Please provide a project title.</div>
           </div>
-          <!-- Textarea for project details in update form -->
+          <!-- Details -->
           <div class="mb-3">
             <label for="updateDetails" class="form-label">Details</label>
             <textarea class="form-control" id="updateDetails" name="details" required></textarea>
-            <div class="invalid-feedback">
-              Please provide project details.
-            </div>
+            <div class="invalid-feedback">Please provide project details.</div>
           </div>
-          <!-- Input field for project total target in update form -->
+          <!-- Total Target -->
           <div class="mb-3">
             <label for="updateTotalTarget" class="form-label">Total Target</label>
             <input type="number" step="0.01" class="form-control" id="updateTotalTarget" name="total_target" required>
-            <div class="invalid-feedback">
-              Please enter a valid total target.
-            </div>
+            <div class="invalid-feedback">Please enter a valid total target.</div>
           </div>
-          <!-- Input field for project start time in update form -->
+          <!-- Start Time -->
           <div class="mb-3">
             <label for="updateStartTime" class="form-label">Start Time</label>
             <input type="datetime-local" class="form-control" id="updateStartTime" name="start_time" required>
-            <div class="invalid-feedback">
-              Please provide a start time.
-            </div>
+            <div class="invalid-feedback">Please provide a start time.</div>
           </div>
-          <!-- Input field for project end time in update form -->
+          <!-- End Time -->
           <div class="mb-3">
             <label for="updateEndTime" class="form-label">End Time</label>
             <input type="datetime-local" class="form-control" id="updateEndTime" name="end_time" required>
-            <div class="invalid-feedback">
-              Please provide an end time.
-            </div>
+            <div class="invalid-feedback">Please provide an end time.</div>
           </div>
-          <!-- Dropdown for selecting project category in update form -->
+          <!-- Category -->
           <div class="mb-3">
             <label for="updateCategory" class="form-label">Category</label>
             <select class="form-select" id="updateCategory" name="category" required>
@@ -213,43 +186,33 @@
               <option value="{{ cat.id }}">{{ cat.name }}</option>
               {% endfor %}
             </select>
-            <div class="invalid-feedback">
-              Please select a category.
-            </div>
+            <div class="invalid-feedback">Please select a category.</div>
           </div>
-
-          <!-- Custom Tags selection block with dropdown and add button for Update Modal -->
+          <!-- Tags -->
           <div class="mb-3">
             <label class="form-label">Tags</label>
-            <div class="input-group">
-              <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown"
-                aria-expanded="false" id="updateTagDropdownButton">Select Tag</button>
-              <ul class="dropdown-menu" id="updateTagDropdownMenu">
-                {% for tag in tags %}
-                <li><a class="dropdown-item" href="#" data-tag-id="{{ tag.id }}" data-tag-name="{{ tag.name }}">{{
-                    tag.name }}</a></li>
-                {% endfor %}
-              </ul>
-              <button class="btn btn-secondary" type="button" id="updateTagButton">Add</button>
-            </div>
-            <input type="hidden" name="tags" id="updateSelectedTagsInput" required>
+            <select class="form-select" id="updateTagsSelect">
+              <option value="">Select a Tag</option>
+              {% for tag in tags %}
+              <option value="{{ tag.id }}">{{ tag.name }}</option>
+              {% endfor %}
+            </select>
+            <button type="button" class="btn btn-secondary mt-2" id="updateTagBtn">Add Tag</button>
             <div id="updateSelectedTagsContainer" class="mt-2"></div>
-            <div class="invalid-feedback">
-              Please select at least one tag.
-            </div>
+            <input type="hidden" name="tags" id="updateSelectedTagsInput" required>
+            <div class="invalid-feedback">Please select at least one tag.</div>
           </div>
-          <!-- End of Tags selection block for Update Modal -->
-
+          <!-- Optional: Update Image -->
+          <div class="mb-3">
+            <label for="updateImage" class="form-label">Project Image</label>
+            <input type="file" class="form-control" id="updateImage" name="image">
+          </div>
         </div>
         <div class="modal-footer">
-          <!-- Button to open the Delete Confirmation modal -->
           <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteConfirmModal">
             Delete
           </button>
-          <!-- Submit button for updating the project, disabled until a change is detected -->
-          <button type="submit" class="btn btn-primary" id="updateSubmitBtn" disabled>
-            Update Project
-          </button>
+          <button type="submit" class="btn btn-primary" id="updateSubmitBtn" disabled>Update Project</button>
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
         </div>
       </form>
@@ -258,8 +221,7 @@
 </div>
 
 <!-- Delete Confirmation Modal -->
-<div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel"
-  aria-hidden="true">
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <form method="POST" id="deleteProjectForm" action="{% url 'project_delete' 0 %}">
@@ -281,55 +243,112 @@
   </div>
 </div>
 
-<!-- JavaScript to handle modals, form validations, and tags management -->
+<!-- JavaScript -->
 <script>
-  // Bootstrap form validation script
+  // Bootstrap form validation
   (function () {
     'use strict'
     var forms = document.querySelectorAll('.needs-validation')
-    Array.prototype.slice.call(forms)
-      .forEach(function (form) {
-        form.addEventListener('submit', function (event) {
-          if (!form.checkValidity()) {
-            event.preventDefault()
-            event.stopPropagation()
-          }
-          form.classList.add('was-validated')
-        }, false)
-      })
+    Array.prototype.slice.call(forms).forEach(function (form) {
+      form.addEventListener('submit', function (event) {
+        if (!form.checkValidity()) {
+          event.preventDefault()
+          event.stopPropagation()
+        }
+        form.classList.add('was-validated')
+      }, false)
+    })
   })();
 
-  let initialUpdateData = {};
+  /* ======== Add Modal: Tags Logic ======== */
+  document.getElementById('addTagBtn').addEventListener('click', function(){
+    var select = document.getElementById('addTagsSelect');
+    var selectedValue = select.value;
+    var selectedText = select.options[select.selectedIndex].text;
+    if(selectedValue === "") return;
+    var container = document.getElementById('selectedTagsContainer');
+    // منع إضافة نفس التاج أكثر من مرة
+    if(container.querySelector('[data-tag-id="'+selectedValue+'"]')) return;
+    var badge = document.createElement('span');
+    badge.className = 'badge bg-primary me-1';
+    badge.textContent = selectedText;
+    badge.setAttribute('data-tag-id', selectedValue);
+    badge.style.cursor = 'pointer';
+    badge.addEventListener('click', function(){
+      this.remove();
+      updateAddTagsInput();
+    });
+    container.appendChild(badge);
+    updateAddTagsInput();
+  });
+  function updateAddTagsInput(){
+    var tags = [];
+    document.querySelectorAll('#selectedTagsContainer span').forEach(function(el){
+      tags.push(el.getAttribute('data-tag-id'));
+    });
+    document.getElementById('selectedTagsInput').value = tags.join(',');
+  }
 
-  // Function to check for changes in the update form
-  function checkUpdateChanges() {
-    const currentData = {
+  /* ======== Update Modal: Tags Logic ======== */
+  document.getElementById('updateTagBtn').addEventListener('click', function(){
+    var select = document.getElementById('updateTagsSelect');
+    var selectedValue = select.value;
+    var selectedText = select.options[select.selectedIndex].text;
+    if(selectedValue === "") return;
+    var container = document.getElementById('updateSelectedTagsContainer');
+    if(container.querySelector('[data-tag-id="'+selectedValue+'"]')) return;
+    var badge = document.createElement('span');
+    badge.className = 'badge bg-primary me-1';
+    badge.textContent = selectedText;
+    badge.setAttribute('data-tag-id', selectedValue);
+    badge.style.cursor = 'pointer';
+    badge.addEventListener('click', function(){
+      this.remove();
+      updateUpdateTagsInput();
+    });
+    container.appendChild(badge);
+    updateUpdateTagsInput();
+  });
+  function updateUpdateTagsInput(){
+    var tags = [];
+    document.querySelectorAll('#updateSelectedTagsContainer span').forEach(function(el){
+      tags.push(el.getAttribute('data-tag-id'));
+    });
+    document.getElementById('updateSelectedTagsInput').value = tags.join(',');
+    checkUpdateChanges();
+  }
+
+  /* ======== Update Modal: Check for Changes ======== */
+  var initialUpdateData = {};
+  function checkUpdateChanges(){
+    var currentData = {
       title: document.getElementById('updateTitle').value,
       details: document.getElementById('updateDetails').value,
       total_target: document.getElementById('updateTotalTarget').value,
       start_time: document.getElementById('updateStartTime').value,
       end_time: document.getElementById('updateEndTime').value,
       category: document.getElementById('updateCategory').value,
-      tags: Array.from(document.getElementById('updateSelectedTagsContainer').querySelectorAll('span'))
-        .map(opt => opt.getAttribute('data-tag-id')).join(',')
+      tags: document.getElementById('updateSelectedTagsInput').value
     };
-    const hasChanged = Object.keys(initialUpdateData).some(key => initialUpdateData[key] !== currentData[key]);
+    var hasChanged = Object.keys(initialUpdateData).some(function(key){
+      return initialUpdateData[key] !== currentData[key];
+    });
     document.getElementById('updateSubmitBtn').disabled = !hasChanged;
   }
 
-  // Populate the update modal with the selected project's data
-  const updateModal = document.getElementById('updateProjectModal');
-  updateModal.addEventListener('show.bs.modal', event => {
-    const button = event.relatedTarget;
-    const projectId = button.getAttribute('data-id');
-    const title = button.getAttribute('data-title');
-    const details = button.getAttribute('data-details');
-    const totalTarget = button.getAttribute('data-total_target');
-    const startTime = button.getAttribute('data-start_time');
-    const endTime = button.getAttribute('data-end_time');
-    const category = button.getAttribute('data-category');
-    const tags = button.getAttribute('data-tags').split(',');
-
+  /* ======== Update Modal: Populate Data ======== */
+  var updateModal = document.getElementById('updateProjectModal');
+  updateModal.addEventListener('show.bs.modal', function(event){
+    var button = event.relatedTarget;
+    var projectId = button.getAttribute('data-id');
+    var title = button.getAttribute('data-title');
+    var details = button.getAttribute('data-details');
+    var totalTarget = button.getAttribute('data-total_target');
+    var startTime = button.getAttribute('data-start_time');
+    var endTime = button.getAttribute('data-end_time');
+    var category = button.getAttribute('data-category');
+    var tags = button.getAttribute('data-tags').split(',');
+    
     document.getElementById('updateProjectId').value = projectId;
     document.getElementById('updateTitle').value = title;
     document.getElementById('updateDetails').value = details;
@@ -337,28 +356,29 @@
     document.getElementById('updateStartTime').value = startTime;
     document.getElementById('updateEndTime').value = endTime;
     document.getElementById('updateCategory').value = category;
-
-    // Setup tags in the update modal based on the project's current tags
-    let container = document.getElementById('updateSelectedTagsContainer');
-    container.innerHTML = '';
-    tags.forEach(tagId => {
-      let item = document.querySelector('#updateTagDropdownMenu a[data-tag-id="' + tagId + '"]');
-      if (item) {
-        let badge = document.createElement('span');
-        badge.className = 'badge bg-primary me-1';
-        badge.textContent = item.getAttribute('data-tag-name');
-        badge.setAttribute('data-tag-id', tagId);
-        badge.style.cursor = 'pointer';
-        badge.addEventListener('click', function () {
-          this.remove();
-          updateUpdateTagsInput();
-        });
-        container.appendChild(badge);
+    
+    // إعداد التاجات في نموذج التحديث
+    var updateContainer = document.getElementById('updateSelectedTagsContainer');
+    updateContainer.innerHTML = "";
+    tags.forEach(function(tagId){
+      if(tagId.trim() !== ""){
+        var option = document.querySelector('#updateTagsSelect option[value="'+tagId+'"]');
+        if(option){
+          var badge = document.createElement('span');
+          badge.className = 'badge bg-primary me-1';
+          badge.textContent = option.text;
+          badge.setAttribute('data-tag-id', tagId);
+          badge.style.cursor = 'pointer';
+          badge.addEventListener('click', function(){
+            this.remove();
+            updateUpdateTagsInput();
+          });
+          updateContainer.appendChild(badge);
+        }
       }
     });
     updateUpdateTagsInput();
-    document.getElementById('updateTagDropdownButton').textContent = 'Select Tag';
-
+    
     initialUpdateData = {
       title: title,
       details: details,
@@ -366,106 +386,20 @@
       start_time: startTime,
       end_time: endTime,
       category: category,
-      tags: tags.join(',')
+      tags: document.getElementById('updateSelectedTagsInput').value
     };
-
+    
     document.getElementById('updateProjectForm').action = "{% url 'project_update' 0 %}".replace("0", projectId);
     document.getElementById('updateSubmitBtn').disabled = true;
   });
+  document.getElementById('updateProjectForm').addEventListener('input', checkUpdateChanges);
 
-  // Enable the update button when form data is changed
-  const updateForm = document.getElementById('updateProjectForm');
-  updateForm.addEventListener('input', checkUpdateChanges);
-
-  // Setup the delete confirmation modal with the current project's ID
-  const deleteConfirmModal = document.getElementById('deleteConfirmModal');
-  deleteConfirmModal.addEventListener('show.bs.modal', event => {
-    const projectId = document.getElementById('updateProjectId').value;
+  /* ======== Delete Modal Setup ======== */
+  var deleteConfirmModal = document.getElementById('deleteConfirmModal');
+  deleteConfirmModal.addEventListener('show.bs.modal', function(event){
+    var projectId = document.getElementById('updateProjectId').value;
     document.getElementById('deleteProjectId').value = projectId;
     document.getElementById('deleteProjectForm').action = "{% url 'project_delete' 0 %}".replace("0", projectId);
   });
-
-  /* ======== JavaScript for Tags Dropdown in Add Modal ======== */
-  let addSelectedTag = null;
-  document.querySelectorAll('#addTagDropdownMenu a').forEach(item => {
-    item.addEventListener('click', function (e) {
-      e.preventDefault();
-      addSelectedTag = {
-        id: this.getAttribute('data-tag-id'),
-        name: this.getAttribute('data-tag-name')
-      };
-      document.getElementById('addTagDropdownButton').textContent = addSelectedTag.name;
-    });
-  });
-
-  document.getElementById('addTagButton').addEventListener('click', function () {
-    if (!addSelectedTag) return;
-    let container = document.getElementById('addSelectedTagsContainer');
-    if (container.querySelector('[data-tag-id="' + addSelectedTag.id + '"]')) {
-      return;
-    }
-    let badge = document.createElement('span');
-    badge.className = 'badge bg-primary me-1';
-    badge.textContent = addSelectedTag.name;
-    badge.setAttribute('data-tag-id', addSelectedTag.id);
-    badge.style.cursor = 'pointer';
-    badge.addEventListener('click', function () {
-      this.remove();
-      updateAddTagsInput();
-    });
-    container.appendChild(badge);
-    updateAddTagsInput();
-  });
-
-  // Update the hidden input with the selected tags for Add Modal
-  function updateAddTagsInput() {
-    let tags = [];
-    document.querySelectorAll('#addSelectedTagsContainer span').forEach(badge => {
-      tags.push(badge.getAttribute('data-tag-id'));
-    });
-    document.getElementById('addSelectedTagsInput').value = tags.join(',');
-  }
-
-  /* ======== JavaScript for Tags Dropdown in Update Modal ======== */
-  let updateSelectedTag = null;
-  document.querySelectorAll('#updateTagDropdownMenu a').forEach(item => {
-    item.addEventListener('click', function (e) {
-      e.preventDefault();
-      updateSelectedTag = {
-        id: this.getAttribute('data-tag-id'),
-        name: this.getAttribute('data-tag-name')
-      };
-      document.getElementById('updateTagDropdownButton').textContent = updateSelectedTag.name;
-    });
-  });
-
-  document.getElementById('updateTagButton').addEventListener('click', function () {
-    if (!updateSelectedTag) return;
-    let container = document.getElementById('updateSelectedTagsContainer');
-    if (container.querySelector('[data-tag-id="' + updateSelectedTag.id + '"]')) {
-      return;
-    }
-    let badge = document.createElement('span');
-    badge.className = 'badge bg-primary me-1';
-    badge.textContent = updateSelectedTag.name;
-    badge.setAttribute('data-tag-id', updateSelectedTag.id);
-    badge.style.cursor = 'pointer';
-    badge.addEventListener('click', function () {
-      this.remove();
-      updateUpdateTagsInput();
-    });
-    container.appendChild(badge);
-    updateUpdateTagsInput();
-  });
-
-  // Update the hidden input with the selected tags for Update Modal and check for changes
-  function updateUpdateTagsInput() {
-    let tags = [];
-    document.querySelectorAll('#updateSelectedTagsContainer span').forEach(badge => {
-      tags.push(badge.getAttribute('data-tag-id'));
-    });
-    document.getElementById('updateSelectedTagsInput').value = tags.join(',');
-    checkUpdateChanges();
-  }
 </script>
 {% endblock %}

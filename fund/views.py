@@ -14,17 +14,25 @@ class ProjectListView(ListView):
     model = Project
     template_name = 'project/ProjectForm.html'
     context_object_name = 'projects'
+    
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['categories'] = Category.objects.all()
         context['tags'] = Tag.objects.all()
         return context
-    
+
 class ProjectCreateView(CreateView):
     model = Project
     form_class = ProjectForm
     template_name = 'project/ProjectForm.html'
     success_url = reverse_lazy('project_list')
+    
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        images = self.request.FILES.getlist('images')
+        for image in images:
+            Picture.objects.create(project=self.object, image=image)
+        return response
 
 class ProjectUpdateView(UpdateView):
     model = Project
@@ -48,6 +56,7 @@ class ProjectDetailView(DetailView):
         context['total_donation'] = self.object.donations.aggregate(total=Sum('amount'))['total'] or 0.0
         context['comments'] = self.object.comments.all().order_by('-created_at')
         return context
+
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
         # Donation => post
@@ -69,7 +78,6 @@ class ProjectDetailView(DetailView):
                     content=comment_text  
                 )
         return redirect('project_detail', pk=self.object.pk)
-
 
 ###############################################################################################
 # User CRUD CBV
