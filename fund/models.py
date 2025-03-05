@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.db.models import Sum
 
 
 class User(AbstractUser):
@@ -31,7 +32,11 @@ class Project(models.Model):
 
 	def __str__(self):
 		return f'{self.title}'
-
+	
+	@property
+	def total_donations(self):
+		total = self.donations.aggregate(total=Sum('amount'))['total']
+		return total or 0.0
 
 class Donation(models.Model):
 	amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
