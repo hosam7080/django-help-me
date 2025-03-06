@@ -1,6 +1,5 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-from django.db.models import Sum
 
 
 class User(AbstractUser):
@@ -11,6 +10,9 @@ class User(AbstractUser):
 	mobile_phone = models.CharField(max_length=11, unique=True, null=True, blank=True)
 	profile_picture = models.FileField(upload_to='media/', blank=True, null=True)
 	created_at = models.DateTimeField(auto_now_add=True)
+	birthdate = models.DateField(null=True, blank=True)
+	facebook_profile = models.URLField(max_length=255, null=True, blank=True)
+	country = models.CharField(max_length=100, null=True, blank=True)
 
 	def __str__(self):
 		return f'{self.username}'
@@ -33,11 +35,7 @@ class Project(models.Model):
 
 	def __str__(self):
 		return f'{self.title}'
-	
-	@property
-	def total_donations(self):
-		total = self.donations.aggregate(total=Sum('amount'))['total']
-		return total or 0.0
+
 
 class Donation(models.Model):
 	amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
@@ -105,11 +103,11 @@ class Reply(models.Model):
 class Picture(models.Model):
 	image = models.FileField(upload_to='media/')
 	created_at = models.DateTimeField(auto_now_add=True)
-	project = models.ForeignKey('Project', related_name='pictures', on_delete=models.CASCADE)
+	project = models.ForeignKey("Project", related_name="pictures", on_delete=models.CASCADE)
 
 	class Meta:
 		verbose_name_plural = "pictures"
-		ordering = ("project",)
+		ordering = ("created_at",)
 
 	def __str__(self):
 		return f'Picture {self.id} on project {self.project}'

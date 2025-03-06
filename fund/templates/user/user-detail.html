@@ -1,0 +1,167 @@
+{% extends 'base/base.html' %}
+{% block content %}
+  <div class="row mb-3 mt-3">
+    <div class="col offset-4">
+      <div class="card text-center shadow-lg" style="width: 22rem;">
+        <div class="card-body">
+          <img src="{{ user.profile_picture.url }}" class="rounded-circle mb-3" width="300" height="300" alt="User Avatar" />
+          <h4 class="card-title">{{ user.first_name }} {{ user.last_name }}</h4>
+          <p class="text-muted">@{{ user.username }}</p>
+          <p class="card-text">{{ user.email }}</p>
+
+          <div class="d-flex justify-content-center gap-3 mt-3">
+            <a href="{% url 'user_update' user.pk %}" class="btn btn-primary btn-sm">Update your information</a>
+          </div>
+
+          <hr />
+        </div>
+      </div>
+    </div>
+  </div>
+  <hr />
+  <div class="row mb-3">
+    <h3 class="display-6">My Projects</h3>
+    {% for project in projects %}
+      <div class="col-4">
+          <div class="card" style="text-decoration: none;">
+						<a href="{% url 'project_detail' project.pk %}">
+							<div id="projectCarousel{{ project.id }}" class="carousel slide" data-bs-ride="carousel">
+								<div class="carousel-inner">
+									{% for image in project.pictures.all %}
+										<div class="carousel-item {% if forloop.first %}active{% endif %}">
+											<img src="{{ image.image.url }}" class="d-block w-100" alt="{{ project.title }}" style="max-height: 300px;" />
+										</div>
+									{% endfor %}
+								</div>
+								<button class="carousel-control-prev" type="button" data-bs-target="#projectCarousel{{ project.id }}" data-bs-slide="prev">
+									<span class="carousel-control-prev-icon" aria-hidden="true"></span>
+									<span class="visually-hidden">Previous</span>
+								</button>
+								<button class="carousel-control-next" type="button" data-bs-target="#projectCarousel{{ project.id }}" data-bs-slide="next">
+									<span class="carousel-control-next-icon" aria-hidden="true"></span>
+									<span class="visually-hidden">Next</span>
+								</button>
+							</div>
+						</a>
+						<div class="card-body" style="text-decoration: none;">
+							<p class="card-text">{{ project.title }}</p>
+							<p class="card-text">
+								Donation: <span class="badge text-bg-success">{{ project.total_donation }}$</span>
+							</p>
+							<p class="card-text">
+								Rating: <span class="badge text-bg-warning">{{ project.avg_rating }}</span>
+							</p>
+							
+						</div>
+						{% comment %} <button class="btn btn-warning btn-sm edit-btn" data-bs-toggle="modal" data-bs-target="#updateProjectModal"
+							data-id="{{ project.id }}" data-title="{{ project.title }}" data-details="{{ project.details }}"
+							data-total_target="{{ project.total_target }}"
+							data-start_time="{{ project.start_time|date:'Y-m-d\\TH:i' }}"
+							data-end_time="{{ project.end_time|date:'Y-m-d\\TH:i' }}"
+							data-category="{% if project.category %}{{ project.category.id }}{% endif %}"
+							data-tags="{% for tag in project.tags.all %}{{ tag.id }}{% if not forloop.last %},{% endif %}{% endfor %}">
+							Edit Your Project
+						</button> {% endcomment %}
+            <a href="{% url 'project_update' project.pk %}" class="btn btn-primary">Update</a>
+            <a href="{% url 'project_delete' project.pk %}" class="btn btn-danger">Delete</a>
+          </div>
+				
+      </div>
+    {% endfor %}
+  </div>
+  <hr />
+  <div class="row">
+    <h3 class="display-6">My Donations</h3>
+    {% for donation in donations %}
+      <div class="col-12">
+        <div class="card mb-2 p-3 shadow-sm">
+          <h5 class="card-title"><a href="{% url 'project_detail' donation.project.pk %}" class="text-decoration-none">{{ donation.project.title }}</a></h5>
+          <p class="card-text">
+            Donated: <span class="badge text-bg-success">{{ donation.amount }}$</span>
+          </p>
+          <p class="text-muted small">On {{ donation.donation_date|date:'F j, Y' }}</p>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% endblock %}
+
+<div class="modal fade" id="updateProjectModal" tabindex="-1" aria-labelledby="updateProjectModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <form method="POST" id="updateProjectForm" action="" enctype="multipart/form-data" class="needs-validation" novalidate>
+        {% csrf_token %}
+        <div class="modal-header">
+          <h5 class="modal-title" id="updateProjectModalLabel">Update Project</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="updateProjectId" name="project_id">
+
+          <div class="mb-3">
+            <label for="updateTitle" class="form-label">Title</label>
+            <input type="text" class="form-control" id="updateTitle" name="title" required>
+            <div class="invalid-feedback">Please provide a project title.</div>
+          </div>
+          <div class="mb-3">
+            <label for="updateDetails" class="form-label">Details</label>
+            <textarea class="form-control" id="updateDetails" name="details" required></textarea>
+            <div class="invalid-feedback">Please provide project details.</div>
+          </div>
+          <div class="mb-3">
+            <label for="updateTotalTarget" class="form-label">Total Target</label>
+            <input type="number" step="0.01" class="form-control" id="updateTotalTarget" name="total_target" required>
+            <div class="invalid-feedback">Please enter a valid total target.</div>
+          </div>
+          <div class="mb-3">
+            <label for="updateStartTime" class="form-label">Start Time</label>
+            <input type="datetime-local" class="form-control" id="updateStartTime" name="start_time" required>
+            <div class="invalid-feedback">Please provide a start time.</div>
+          </div>
+          <div class="mb-3">
+            <label for="updateEndTime" class="form-label">End Time</label>
+            <input type="datetime-local" class="form-control" id="updateEndTime" name="end_time" required>
+            <div class="invalid-feedback">Please provide an end time.</div>
+          </div>
+          <div class="mb-3">
+            <label for="updateCategory" class="form-label">Category</label>
+            <select class="form-select" id="updateCategory" name="category" required>
+              <option value="">Select a Category</option>
+              {% for cat in categories %}
+              <option value="{{ cat.id }}">{{ cat.name }}</option>
+              {% endfor %}
+            </select>
+            <div class="invalid-feedback">Please select a category.</div>
+          </div>
+
+          <!-- Tags for update -->
+          <div class="mb-3">
+            <label class="form-label">Tags</label>
+            <select class="form-select" id="updateTagsSelect">
+              <option value="">Select a Tag</option>
+              {% for tag in tags %}
+              <option value="{{ tag.id }}">{{ tag.name }}</option>
+              {% endfor %}
+            </select>
+            <button type="button" class="btn btn-secondary mt-2" id="updateTagBtn">Add Tag</button>
+            <div id="updateSelectedTagsContainer" class="mt-2"></div>
+            <input type="hidden" name="tags" id="updateSelectedTagsInput" required>
+            <div class="invalid-feedback">Please select at least one tag.</div>
+          </div>
+
+          <div class="mb-3">
+            <label for="updateImages" class="form-label">Project Images</label>
+            <input type="file" class="form-control" id="updateImages" name="images" multiple>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteConfirmModal">
+            Delete
+          </button>
+          <button type="submit" class="btn btn-primary" id="updateSubmitBtn" disabled>Update Project</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Comment,Category, Donation,Rate,Reply,User,Report,Project,Tag
+from .models import *
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django.utils.translation import gettext_lazy as _
@@ -29,23 +29,23 @@ class CustomUserAdmin(UserAdmin):
 	ordering = ("email",)
 
 
+class PictureInline(admin.TabularInline):
+    model = Picture
+    extra = 3
+
+
+class AdminProjectForm(admin.ModelAdmin):
+	inlines = [PictureInline]
+
+
+admin.site.register(Project, AdminProjectForm)
+admin.site.register(Picture)
 admin.site.register(User, CustomUserAdmin)
 admin.site.register(Comment)
 admin.site.register(Category)
 admin.site.register(Rate)
 admin.site.register(Reply)
 admin.site.register(Report)
-admin.site.register(Project)
+# admin.site.register(Project)
 admin.site.register(Tag)
 admin.site.register(Donation)
-
-
-
-
-
-# testing 
-from .models import Picture
-
-@admin.register(Picture)
-class PictureAdmin(admin.ModelAdmin):
-    list_display = ('id', 'project', 'created_at')

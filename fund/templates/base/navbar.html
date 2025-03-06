@@ -12,34 +12,41 @@
                         <a class="nav-link " aria-current="page" href="{% url 'home' %}">Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Raise fund for a project</a>
-                    </li><li class="nav-item">
-                        <a class="nav-link" href="#">Browse projects</a>
+                        <a class="nav-link" href="{% url 'project_list' %}">Browse projects</a>
                     </li>
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Category</a>
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Categories</a>
                         <ul class="dropdown-menu">
-                            {% for category in categories %}
-                            <li><a class="dropdown-item" href="#">{{ category.name }}</a></li>
-                            {% endfor %}
-                            {% comment %} <li><a class="dropdown-item" href="#">Action</a></li>
-                            <li><a class="dropdown-item" href="#">Another action</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="#">Something else here</a></li> {% endcomment %}
+                          {% for category in categories %}
+                            <li>
+                              <a class="dropdown-item" href="#">{{ category.name }}</a>
+                            </li>
+                          {% endfor %}
                         </ul>
                     </li>
                 </ul>
             </div>
         </div>
         <div>
-            <form class="d-flex" role="search" method="GET">
+            {% if request.user.is_authenticated %}
+              <form class="d-flex" role="search" method="GET">
                 <input class="form-control me-2" type="search" aria-label="Search" name="q" placeholder="Search by title or tag" value="{{ query }}">
                 <button class="btn btn-outline-success" type="submit">Search</button>
-            </form>
+              </form>
+            {% endif %}
+            
         </div>
         <div>
-            <a class="btn btn-primary" href="#">Login</a>
-            <a class="btn btn-success" href="{% url 'user_create' %}">Register</a>
+            {% if request.user.is_authenticated %}
+              <form method='post' action="{% url 'signout' %}">
+                <a href="{% url 'user_detail' request.user.pk %}" class="btn btn-primary">View Profile</a>
+                {% csrf_token %}
+                <button type="submit" class="btn btn-warning">Log out (Logged in as {{ request.user.username }})</button>
+              </form>
+            {% else %}
+              <a class="btn btn-primary" href="{% url 'signin' %}">Login</a>
+              <a class="btn btn-success" href="{% url 'signup' %}">Register</a>
+            {% endif %}
         </div>    
     </div>
 </nav>
