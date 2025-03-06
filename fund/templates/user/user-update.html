@@ -1,10 +1,30 @@
-{% extends '../base/base.html' %}
-{% block content %}
-<h2>Edit User</h2>
-<form method="post" >
+{% extends 'base/base.html' %}
+{% comment %} {% block content %}
+  <h2>Edit User</h2>
+  <form method="post">
     {% csrf_token %}
     {{ form.as_p }}
     <button type="submit">Save</button>
-</form>
-<a href="{% url 'user_list' %}">Back</a>
+  </form>
+{% endblock %} {% endcomment %}
+
+
+
+{% block content %}
+  <div class="row m-5">
+    <div class="col">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Update</h5>
+
+          <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.as_p }}
+
+            <button type="submit" class="btn btn-success">Save<button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
 {% endblock %}
