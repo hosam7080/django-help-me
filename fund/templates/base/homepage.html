@@ -45,32 +45,38 @@
 			<h2>Top Rated Projects</h2>
 			{% for project in highest_rated_projects %}
 				<div class="col-4">
-					<a href="{% url 'project_detail' project.pk %}">
-						<div class="card" style="text-decoration: none;">
-							<div id="projectCarousel{{ project.id }}" class="carousel slide" data-bs-ride="carousel">
-									<div class="carousel-inner">
-											{% for image in project.pictures.all %}
-											<div class="carousel-item {% if forloop.first %}active{% endif %}">
-													<img src="{{ image.image.url }}" class="d-block w-100" alt="{{ project.title }}" style="max-height: 300px;">
-											</div>
-											{% endfor %}
-									</div>
-									<button class="carousel-control-prev" type="button" data-bs-target="#projectCarousel{{ project.id }}" data-bs-slide="prev">
-											<span class="carousel-control-prev-icon" aria-hidden="true"></span>
-											<span class="visually-hidden">Previous</span>
-									</button>
-									<button class="carousel-control-next" type="button" data-bs-target="#projectCarousel{{ project.id }}" data-bs-slide="next">
-											<span class="carousel-control-next-icon" aria-hidden="true"></span>
-											<span class="visually-hidden">Next</span>
-									</button>
+					<div class="card" style="text-decoration: none;">
+						<a href="{% url 'project_detail' project.pk %}">
+							<div>
+								<div id="projectCarousel{{ project.id }}" class="carousel slide" data-bs-ride="carousel">
+										<div class="carousel-inner">
+												{% for image in project.pictures.all %}
+												<div class="carousel-item {% if forloop.first %}active{% endif %}">
+														<img src="{{ image.image.url }}" class="d-block w-100" alt="{{ project.title }}" style="max-height: 300px;">
+												</div>
+												{% endfor %}
+										</div>
+										<button class="carousel-control-prev" type="button" data-bs-target="#projectCarousel{{ project.id }}" data-bs-slide="prev">
+												<span class="carousel-control-prev-icon" aria-hidden="true"></span>
+												<span class="visually-hidden">Previous</span>
+										</button>
+										<button class="carousel-control-next" type="button" data-bs-target="#projectCarousel{{ project.id }}" data-bs-slide="next">
+												<span class="carousel-control-next-icon" aria-hidden="true"></span>
+												<span class="visually-hidden">Next</span>
+										</button>
+								</div>
+								<div class="card-body">
+									<p class="card-text">{{ project.title }}</p>
+									<p class="card-text">Donation: <span class="badge text-bg-success">{{ project.total_donation }}$</span></p>
+									<p class="card-text">Rating: <span class="badge text-bg-warning">{{ project.avg_rating }}</span></p>
+								</div>
 							</div>
-							<div class="card-body">
-								<p class="card-text">{{ project.title }}</p>
-								<p class="card-text">Donation: <span class="badge text-bg-success">{{ project.total_donation }}$</span></p>
-								<p class="card-text">Rating: <span class="badge text-bg-warning">{{ project.avg_rating }}</span></p>
-							</div>
-						</div>
-					</a>
+						</a>
+						<span class="m-1 d-flex justify-content-between">
+							<button class="btn btn-success"><a href="{% url 'rate_project' project.pk %}" class="text-light text-decoration-none">Rate Project</a></button>
+							<button class="btn btn-danger"><a href="{% url 'report_project' project.pk %}" class="text-light text-decoration-none">Report Project</a></button>
+						</span>
+					</div>
 				</div>
 			{% endfor %}
 		</div>
@@ -82,32 +88,38 @@
 			<h2>Top Donated Projects</h2>
 			{% for project in highest_donated_projects %}
 				<div class="col-4">
-					<a href="{% url 'project_detail' project.pk %}">
-						<div class="card" style="text-decoration: none;">
-							<div id="projectCarousel{{ project.id }}" class="carousel slide" data-bs-ride="carousel">
-									<div class="carousel-inner">
-											{% for image in project.pictures.all %}
-											<div class="carousel-item {% if forloop.first %}active{% endif %}">
-													<img src="{{ image.image.url }}" class="d-block w-100" alt="{{ project.title }}" style="max-height: 300px;">
-											</div>
-											{% endfor %}
-									</div>
-									<button class="carousel-control-prev" type="button" data-bs-target="#projectCarousel{{ project.id }}" data-bs-slide="prev">
-											<span class="carousel-control-prev-icon" aria-hidden="true"></span>
-											<span class="visually-hidden">Previous</span>
-									</button>
-									<button class="carousel-control-next" type="button" data-bs-target="#projectCarousel{{ project.id }}" data-bs-slide="next">
-											<span class="carousel-control-next-icon" aria-hidden="true"></span>
-											<span class="visually-hidden">Next</span>
-									</button>
+					<div class="card" style="text-decoration: none;">
+						<a href="{% url 'project_detail' project.pk %}">
+							<div>
+								<div id="projectCarousel{{ project.id }}" class="carousel slide" data-bs-ride="carousel">
+										<div class="carousel-inner">
+												{% for image in project.pictures.all %}
+												<div class="carousel-item {% if forloop.first %}active{% endif %}">
+														<img src="{{ image.image.url }}" class="d-block w-100" alt="{{ project.title }}" style="max-height: 300px;">
+												</div>
+												{% endfor %}
+										</div>
+										<button class="carousel-control-prev" type="button" data-bs-target="#projectCarousel{{ project.id }}" data-bs-slide="prev">
+												<span class="carousel-control-prev-icon" aria-hidden="true"></span>
+												<span class="visually-hidden">Previous</span>
+										</button>
+										<button class="carousel-control-next" type="button" data-bs-target="#projectCarousel{{ project.id }}" data-bs-slide="next">
+												<span class="carousel-control-next-icon" aria-hidden="true"></span>
+												<span class="visually-hidden">Next</span>
+										</button>
+								</div>
+								<div class="card-body">
+									<p class="card-text">{{ project.title }}</p>
+									<p class="card-text">Donation: <span class="badge text-bg-success">{{ project.total_donation }}$</span></p>
+									<p class="card-text">Rating: <span class="badge text-bg-warning">{{ project.avg_rating }}</span></p>
+								</div>
 							</div>
-							<div class="card-body">
-								<p class="card-text">{{ project.title }}</p>
-								<p class="card-text">Donation: <span class="badge text-bg-success">{{ project.total_donation }}$</span></p>
-								<p class="card-text">Rating: <span class="badge text-bg-warning">{{ project.avg_rating }}</span></p>
-							</div>
-						</div>
-					</a>
+						</a>
+						<span class="m-1 d-flex justify-content-between">
+							<button class="btn btn-success"><a href="{% url 'rate_project' project.pk %}" class="text-light text-decoration-none">Rate Project</a></button>
+							<button class="btn btn-danger"><a href="{% url 'report_project' project.pk %}" class="text-light text-decoration-none">Report Project</a></button>
+						</span>
+					</div>
 				</div>
 			{% endfor %}
 		</div>
@@ -120,33 +132,39 @@
 			<h2>Latest Projects</h2>
 			{% for project in latest_projects %}
 				<div class="col-4">
-					<a href="{% url 'project_detail' project.pk %}">
-						<div class="card" style="text-decoration: none;">
-							<div id="projectCarousel{{ project.id }}" class="carousel slide" data-bs-ride="carousel">
-									<div class="carousel-inner">
-											{% for image in project.pictures.all %}
-											<div class="carousel-item {% if forloop.first %}active{% endif %}">
-													<img src="{{ image.image.url }}" class="d-block w-100" alt="{{ project.title }}" style="max-height: 300px;">
-											</div>
-											{% endfor %}
-									</div>
-									<button class="carousel-control-prev" type="button" data-bs-target="#projectCarousel{{ project.id }}" data-bs-slide="prev">
-											<span class="carousel-control-prev-icon" aria-hidden="true"></span>
-											<span class="visually-hidden">Previous</span>
-									</button>
-									<button class="carousel-control-next" type="button" data-bs-target="#projectCarousel{{ project.id }}" data-bs-slide="next">
-											<span class="carousel-control-next-icon" aria-hidden="true"></span>
-											<span class="visually-hidden">Next</span>
-									</button>
+					<div class="card" style="text-decoration: none;">
+						<a href="{% url 'project_detail' project.pk %}">
+							<div>
+								<div id="projectCarousel{{ project.id }}" class="carousel slide" data-bs-ride="carousel">
+										<div class="carousel-inner">
+												{% for image in project.pictures.all %}
+												<div class="carousel-item {% if forloop.first %}active{% endif %}">
+														<img src="{{ image.image.url }}" class="d-block w-100" alt="{{ project.title }}" style="max-height: 300px;">
+												</div>
+												{% endfor %}
+										</div>
+										<button class="carousel-control-prev" type="button" data-bs-target="#projectCarousel{{ project.id }}" data-bs-slide="prev">
+												<span class="carousel-control-prev-icon" aria-hidden="true"></span>
+												<span class="visually-hidden">Previous</span>
+										</button>
+										<button class="carousel-control-next" type="button" data-bs-target="#projectCarousel{{ project.id }}" data-bs-slide="next">
+												<span class="carousel-control-next-icon" aria-hidden="true"></span>
+												<span class="visually-hidden">Next</span>
+										</button>
+								</div>
+								<div class="card-body" style="text-decoration: none;">
+									<p class="card-text">{{ project.title }}</p>
+									<p class="card-text">Donation: <span class="badge text-bg-success">{{ project.total_donation }}$</span></p>
+									<p class="card-text">Rating: <span class="badge text-bg-warning">{{ project.avg_rating }}</span></p>
+									<p class="text-muted">End: {{ project.end_time|date:'F j, Y' }}</p>
+								</div>
 							</div>
-							<div class="card-body" style="text-decoration: none;">
-								<p class="card-text">{{ project.title }}</p>
-								<p class="card-text">Donation: <span class="badge text-bg-success">{{ project.total_donation }}$</span></p>
-								<p class="card-text">Rating: <span class="badge text-bg-warning">{{ project.avg_rating }}</span></p>
-								<p class="text-muted">End: {{ project.end_time|date:'F j, Y' }}</p>
-							</div>
-						</div>
-					</a>
+						</a>
+						<span class="m-1 d-flex justify-content-between">
+							<button class="btn btn-success"><a href="{% url 'rate_project' project.pk %}" class="text-light text-decoration-none">Rate Project</a></button>
+							<button class="btn btn-danger"><a href="{% url 'report_project' project.pk %}" class="text-light text-decoration-none">Report Project</a></button>
+						</span>
+					</div>		
 				</div>
 			{% endfor %}
 		</div>
@@ -159,32 +177,38 @@
 			<h2>Featured Projects</h2>
 			{% for project in featured_projects %}
 				<div class="col-4">
-					<a href="{% url 'project_detail' project.pk %}">
-						<div class="card" style="text-decoration: none;">
-							<div id="projectCarousel{{ project.id }}" class="carousel slide" data-bs-ride="carousel">
-									<div class="carousel-inner">
-											{% for image in project.pictures.all %}
-											<div class="carousel-item {% if forloop.first %}active{% endif %}">
-													<img src="{{ image.image.url }}" class="d-block w-100" alt="{{ project.title }}" style="max-height: 300px;">
-											</div>
-											{% endfor %}
-									</div>
-									<button class="carousel-control-prev" type="button" data-bs-target="#projectCarousel{{ project.id }}" data-bs-slide="prev">
-											<span class="carousel-control-prev-icon" aria-hidden="true"></span>
-											<span class="visually-hidden">Previous</span>
-									</button>
-									<button class="carousel-control-next" type="button" data-bs-target="#projectCarousel{{ project.id }}" data-bs-slide="next">
-											<span class="carousel-control-next-icon" aria-hidden="true"></span>
-											<span class="visually-hidden">Next</span>
-									</button>
+					<div class="card " style="text-decoration: none;">
+						<a href="{% url 'project_detail' project.pk %}">
+							<div>
+								<div id="projectCarousel{{ project.id }}" class="carousel slide" data-bs-ride="carousel">
+										<div class="carousel-inner">
+												{% for image in project.pictures.all %}
+												<div class="carousel-item {% if forloop.first %}active{% endif %}">
+														<img src="{{ image.image.url }}" class="d-block w-100" alt="{{ project.title }}" style="max-height: 300px;">
+												</div>
+												{% endfor %}
+										</div>
+										<button class="carousel-control-prev" type="button" data-bs-target="#projectCarousel{{ project.id }}" data-bs-slide="prev">
+												<span class="carousel-control-prev-icon" aria-hidden="true"></span>
+												<span class="visually-hidden">Previous</span>
+										</button>
+										<button class="carousel-control-next" type="button" data-bs-target="#projectCarousel{{ project.id }}" data-bs-slide="next">
+												<span class="carousel-control-next-icon" aria-hidden="true"></span>
+												<span class="visually-hidden">Next</span>
+										</button>
+								</div>
+								<div class="card-body">
+									<p class="card-text">{{ project.title }}</p>
+									<p class="card-text">Donation: <span class="badge text-bg-success">{{ project.total_donation }}$</span></p>
+									<p class="card-text">Rating: <span class="badge text-bg-warning">{{ project.avg_rating }}</span></p>
+								</div>
 							</div>
-							<div class="card-body">
-								<p class="card-text">{{ project.title }}</p>
-								<p class="card-text">Donation: <span class="badge text-bg-success">{{ project.total_donation }}$</span></p>
-								<p class="card-text">Rating: <span class="badge text-bg-warning">{{ project.avg_rating }}</span></p>
-							</div>
-						</div>
-					</a>
+						</a>
+						<span class="m-1 d-flex justify-content-between">
+							<button class="btn btn-success"><a href="{% url 'rate_project' project.pk %}" class="text-light text-decoration-none">Rate Project</a></button>
+							<button class="btn btn-danger"><a href="{% url 'report_project' project.pk %}" class="text-light text-decoration-none">Report Project</a></button>
+						</span>
+					</div>
 				</div>
 			{% endfor %}
 		</div>

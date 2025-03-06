@@ -8,17 +8,18 @@
 
     {% include 'base/stylesheets.html' %}
   </head>
-  <body>
+  <body class="d-flex flex-column min-vh-100">
     {% if not dont_show_navbar %}
       {% include 'base/navbar.html' %}
     {% endif %}
 
-    <div class="container">
+    <div class="container flex-grow-1 mb-5" >
       {% block content %}
       {% endblock content %}
     </div>
-
-    {% include 'base/footer.html' %}
+    <div>
+      {% include 'base/footer.html' %}
+    </div>
     {% include 'base/scripts.html' %}
   </body>
 </html>
