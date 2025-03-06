@@ -15,6 +15,7 @@ urlpatterns = [
     path('projects/<int:pk>/delete/', LR(ProjectDeleteView.as_view()), name='project_delete'),
     path('projects/<int:pk>/', LR(ProjectDetailView.as_view()), name='project_detail'),
 		path('projects/<int:pk>/donation/', LR(DonateProject.as_view()), name='project_donate'),
+		path('projects/<int:pk>/comment/', LR(CommentProject.as_view()), name='project_comment'),
 
 
 		###############################################################################################
@@ -23,6 +24,7 @@ urlpatterns = [
     path('users/update/<int:pk>/', LR(UserUpdateView.as_view()), name='user_update'),
     path('users/delete/<int:pk>/', LR(UserDeleteView.as_view()), name='user_delete'),
     path('users/<int:pk>/', LR(UserDetailView.as_view()), name='user_detail'),
+		path('user/activate/', ActivateUser.as_view(), name='user_activate'),
 
 
 		###############################################################################################

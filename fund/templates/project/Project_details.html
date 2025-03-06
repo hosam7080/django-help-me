@@ -91,18 +91,18 @@
         <h3 class="card-title">Comments</h3>
       </div>
       <div class="card-body">
-        <form method="post" class="needs-validation" novalidate>
+        <form method="post" class="needs-validation" novalidate action="{% url 'project_comment' project.pk %}">
           {% csrf_token %}
           <div class="mb-3">
             <label for="commentText" class="form-label">Add a Comment</label>
-            <textarea name="comment_text" id="commentText" class="form-control" placeholder="Add a comment" required></textarea>
+            <textarea name="comment" id="commentText" class="form-control" placeholder="Add a comment" required></textarea>
             <div class="invalid-feedback">Please enter a comment.</div>
           </div>
-          <button type="submit" name="comment" class="btn btn-secondary">Add Comment</button>
+          <button type="submit" class="btn btn-secondary">Add Comment</button>
         </form>
         <hr>
         <ul class="list-unstyled">
-          {% for comment in comments %}
+          {% for comment in project.comments.all %}
           <div class="d-flex justify-content-between m-2">
             <li class="mb-2">
               <strong>{{ comment.user.username }}</strong>: {{ comment.content }} <br>
@@ -110,6 +110,7 @@
             </li>
             <button class="btn btn-danger"><a href="{% url 'report_comment' project.pk comment.pk %}" class="text-light text-decoration-none">Report Comment</a></button>
           </div>
+
           {% empty %}
           <li>No comments yet.</li>
           {% endfor %}

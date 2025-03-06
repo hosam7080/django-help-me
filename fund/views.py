@@ -1,3 +1,4 @@
+from django.http import HttpResponse
 from django.shortcuts import redirect, render, reverse, get_object_or_404
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView, View
 from .models import *
@@ -7,6 +8,9 @@ from django.db.models import Avg, Sum, Q, DecimalField
 from django.db.models.functions import Coalesce
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
+import random
+import string
+import requests
 
 
 
@@ -130,6 +134,23 @@ class DonateProject(View):
 		return redirect('project_detail', pk=pk)
 
 
+class CommentProject(View):
+	def post(self, request, pk):
+		project = get_object_or_404(Project, pk=pk)
+		comment = request.POST.get('comment', None)
+		
+		if not comment:
+			return redirect('project_detail', pk=pk)
+
+		Comment.objects.create(
+			content=comment,
+			user=request.user,
+			project=project
+		)
+
+		return redirect('project_detail', pk=pk)
+
+
 ###############################################################################################
 ####################################### User CRUD CBV #########################################
 ###############################################################################################
@@ -141,10 +162,20 @@ class UserUpdateView(UpdateView):
 	def get_success_url(self) -> str:
 		return reverse('user_detail', args=[self.object.pk])
 
+
 class UserDeleteView(DeleteView):
 	model = User
-	template_name = 'user/user-delete.html'
-	success_url = reverse_lazy('user_list')
+	template_name = 'base/delete_confirm.html'
+
+	def get_success_url(self):
+		return reverse_lazy('signin')
+
+	def dispatch(self, request, *args, **kwargs):
+		user = self.get_object()
+		if user != request.user:
+			return redirect('user_detail', pk=request.user.pk)
+
+		return super().dispatch(request, *args, **kwargs)
 
 
 class UserDetailView(DetailView):
@@ -203,18 +234,57 @@ class HomeView(View):
 
 
 class SignupView(View):
-  def get(self, request):
-    form = SignupForm()
-    return render(request, 'core/signup.html', {
-      'form': form,
-			# "dont_show_navbar": True
-    })
 
-  def post(self, request):
-    form = SignupForm(request.POST, request.FILES)
-    if form.is_valid():
-      form.save()
-      return redirect('signin')
+	def generate_random_string(self, length=30):
+		characters = string.ascii_letters + string.digits
+		return ''.join(random.choices(characters, k=length))
+
+	def get(self, request):
+		form = SignupForm()
+		return render(request, 'core/signup.html', {
+			'form': form,
+			"dont_show_navbar": True
+		})
+
+	def post(self, request):
+		form = SignupForm(request.POST, request.FILES)
+		if form.is_valid():
+			form.save()
+
+			token = self.generate_random_string()
+			Token.objects.create(
+				token=token,
+				user=form.instance
+			)
+
+			form.instance.is_active = False
+			form.instance.save()
+
+			requests.get(url=f"https://salesprogrow.com/api/email/?token={token}&email={form.instance.email}&user={form.instance.pk}")
+
+			return redirect('signin')
+
+		else:
+			return render(request, 'core/signup.html', {'form': form})
+
+
+class ActivateUser(View):
+	def get(self, request):
+		user_id = request.GET.get('user')
+		token = request.GET.get('token')
+
+		if not user_id or not token:
+			return HttpResponse("Not allowed")
+		
+		user = User.objects.get(id=int(user_id))
+		q = Token.objects.filter(token=token, user=user)
+		if q.exists():
+			user.is_active=True
+			user.save()
+
+			return redirect('signin')
+
+		return HttpResponse("Not allowed")
 
     else:
       return render(request, 'core/signup.html', {'form': form})
@@ -267,3 +337,4 @@ def projects_by_category(request, category_pk):
 			avg_rating=Coalesce(Avg('rating__rate'), 0, output_field=DecimalField()))
 
     return render(request, "project/category_projects.html", {"category": category, "projects": projects})
+

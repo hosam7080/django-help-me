@@ -18,6 +18,11 @@ class User(AbstractUser):
 		return f'{self.username}'
 
 
+class Token(models.Model):
+	token = models.CharField(max_length=250, unique=True)
+	user = models.OneToOneField(User, related_name='tokens', on_delete=models.CASCADE)
+
+
 class Project(models.Model):
 	title = models.CharField(max_length=255, default="Project")
 	details = models.TextField(null=True, blank=True)
