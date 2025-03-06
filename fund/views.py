@@ -128,6 +128,24 @@ class DonateProject(View):
 		return redirect('project_detail', pk=pk)
 
 
+class CommentProject(View):
+	def post(self, request, pk):
+		project = get_object_or_404(Project, pk=pk)
+		comment = request.POST.get('comment', None)
+		
+		print('comment', comment)
+		if not comment:
+			return redirect('project_detail', pk=pk)
+
+		Comment.objects.create(
+			content=comment,
+			user=request.user,
+			project=project
+		)
+
+		return redirect('project_detail', pk=pk)
+
+
 ###############################################################################################
 ####################################### User CRUD CBV #########################################
 ###############################################################################################
