@@ -36,7 +36,7 @@ class SignupForm(UserCreationForm):
 		'class': 'form-control',
 	}))
 
-	profile_picture = forms.ImageField(widget=forms.FileInput(attrs={
+	profile_picture = forms.FileField(widget=forms.FileInput(attrs={
 		'class': 'form-control',
 	}))
 
@@ -110,7 +110,7 @@ class UserUpdateForm(UserChangeForm):
 		'class': 'form-control',
 	}))
 
-	profile_picture = forms.ImageField(widget=forms.FileInput(attrs={
+	profile_picture = forms.FileField(widget=forms.FileInput(attrs={
 		'class': 'form-control',
 	}))
 
