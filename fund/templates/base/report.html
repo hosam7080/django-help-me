@@ -1,0 +1,25 @@
+{% extends "base/base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    {% if comment %}
+        <h2>Report Comment</h2>
+        <div>
+        <p><strong>Comment:</strong></p>
+        </div>
+        <p> {{ comment.content }}</p>
+    {% else %}
+        <h2>Report Project: {{ project.title }}</h2>
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="id_reason" class="form-label"><strong>Reason for Reporting:</strong></label>
+            {{ form.reason }}
+        </div>
+        <button type="submit" class="btn btn-danger">Submit Report</button>
+        <a href="{% url 'project_detail' project.pk %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock %}

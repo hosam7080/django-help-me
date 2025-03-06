@@ -1,11 +1,13 @@
 from django.shortcuts import redirect, render, reverse, get_object_or_404
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView, View
 from .models import *
-from .forms import ProjectForm, SignupForm, UserUpdateForm
+from .forms import *
 from django.urls import reverse_lazy
 from django.db.models import Avg, Sum, Q, DecimalField
 from django.db.models.functions import Coalesce
 from django.utils import timezone
+from django.contrib.auth.decorators import login_required
+
 
 
 ###############################################################################################
@@ -205,7 +207,7 @@ class SignupView(View):
     form = SignupForm()
     return render(request, 'core/signup.html', {
       'form': form,
-			"dont_show_navbar": True
+			# "dont_show_navbar": True
     })
 
   def post(self, request):
@@ -216,3 +218,52 @@ class SignupView(View):
 
     else:
       return render(request, 'core/signup.html', {'form': form})
+
+
+@login_required
+def report_item(request, project_pk, comment_pk=None):
+    project = get_object_or_404(Project, pk=project_pk)
+    comment = get_object_or_404(Comment, pk=comment_pk) if comment_pk else None
+
+    if request.method == "POST":
+        form = ReportForm(request.POST)
+        if form.is_valid():
+            report = form.save(commit=False)
+            report.project = project 
+            report.comment = comment if comment else None 
+            report.reported_by = request.user
+            report.save()
+            return redirect("project_detail", pk=project.pk)
+
+    else:
+        form = ReportForm()
+
+    return render(request, "base/report.html", {"form": form, "project": project, "comment": comment})
+
+@login_required
+def rate_project(request, project_pk):
+    project = get_object_or_404(Project, pk=project_pk)
+
+    existing_rate = Rate.objects.filter(project=project, rated_by=request.user).first()
+    
+    if request.method == "POST":
+        form = RateForm(request.POST, instance=existing_rate)
+        if form.is_valid():
+            rate = form.save(commit=False)
+            rate.project = project
+            rate.rated_by = request.user
+            rate.save()
+            return redirect("project_detail", pk=project.pk)
+
+    else:
+        form = RateForm(instance=existing_rate)
+
+    return render(request, "base/rate.html", {"form": form, "project": project})
+
+def projects_by_category(request, category_pk):
+    category = get_object_or_404(Category, pk=category_pk)
+    projects = Project.objects.filter(category=category).annotate(
+			total_donation=Coalesce(Sum('donations__amount'), 0, output_field=DecimalField()),
+			avg_rating=Coalesce(Avg('rating__rate'), 0, output_field=DecimalField()))
+
+    return render(request, "project/category_projects.html", {"category": category, "projects": projects})

@@ -1,5 +1,5 @@
 from django import forms
-from .models import Project, User
+from .models import Project, Rate, User, Report
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, UserChangeForm
 
 
@@ -119,3 +119,20 @@ class UserUpdateForm(UserChangeForm):
 	facebook_profile = forms.URLField(required=False, widget=forms.URLInput(attrs={'class': 'form-control'}))
 
 	country = forms.CharField(required=False, widget=forms.TextInput(attrs={'class': 'form-control'}))
+
+
+class ReportForm(forms.ModelForm):
+    class Meta:
+        model = Report
+        fields = ["reason"]
+        widgets = {
+            "reason": forms.Textarea(attrs={"class": "form-control", "rows": 3, "placeholder": "Enter your reason for reporting"})
+        }
+ 
+class RateForm(forms.ModelForm):
+	class Meta:
+		model = Rate
+		fields = ["rate"]
+		widgets = {
+            "rate": forms.Select(attrs={"class": "form-control"})
+        }

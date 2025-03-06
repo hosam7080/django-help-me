@@ -32,4 +32,11 @@ urlpatterns = [
 		path('login/', auth_views.LoginView.as_view(template_name='core/signin.html', authentication_form=LoginForm), name='signin'),
 		path('logout/', auth_views.LogoutView.as_view(template_name='core/signin.html'), name='signout'),
 		path('signup/', SignupView.as_view(), name='signup'),
+  
+  
+  ############## new ADDitions ########
+	path("report/project/<int:project_pk>/", report_item, name="report_project"),
+    path("report/comment/<int:project_pk>/<int:comment_pk>/", report_item, name="report_comment"),
+    path("rate/project/<int:project_pk>//", rate_project, name="rate_project"),
+    path("category/<int:category_pk>/", projects_by_category, name="projects_by_category"),
 ]

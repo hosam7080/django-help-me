@@ -79,6 +79,11 @@
     </div>
   </section>
 
+  <span class="m-1 d-flex justify-content-between">
+    <button class="btn btn-success"><a href="{% url 'rate_project' project.pk %}" class="text-light text-decoration-none">Rate Project</a></button>
+    <button class="btn btn-danger"><a href="{% url 'report_project' project.pk %}" class="text-light text-decoration-none">Report Project</a></button>
+  </span>
+
   <!-- Comments Section -->
   <section class="section">
     <div class="card">
@@ -98,10 +103,13 @@
         <hr>
         <ul class="list-unstyled">
           {% for comment in comments %}
-          <li class="mb-2">
-            <strong>{{ comment.user.username }}</strong>: {{ comment.content }} <br>
-            <small class="text-muted">{{ comment.created_at }}</small>
-          </li>
+          <div class="d-flex justify-content-between m-2">
+            <li class="mb-2">
+              <strong>{{ comment.user.username }}</strong>: {{ comment.content }} <br>
+              <small class="text-muted">{{ comment.created_at }}</small>
+            </li>
+            <button class="btn btn-danger"><a href="{% url 'report_comment' project.pk comment.pk %}" class="text-light text-decoration-none">Report Comment</a></button>
+          </div>
           {% empty %}
           <li>No comments yet.</li>
           {% endfor %}
