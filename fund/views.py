@@ -286,9 +286,6 @@ class ActivateUser(View):
 
 		return HttpResponse("Not allowed")
 
-    else:
-      return render(request, 'core/signup.html', {'form': form})
-
 
 @login_required
 def report_item(request, project_pk, comment_pk=None):
