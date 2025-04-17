@@ -31,7 +31,7 @@ source env/bin/activate
 
 3. Install dependencies:
 ```bash
-pip install -r requirements.txt
+pip install -r req.text
 ```
 
 4. Apply migrations and run the server:
